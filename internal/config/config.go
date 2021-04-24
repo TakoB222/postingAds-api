@@ -1,10 +1,9 @@
 package config
 
 import (
-	"github.com/TakoB222/postingAds-api/pkg"
+	"github.com/TakoB222/postingAds-api/pkg/logger"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
-	"strings"
 	"time"
 )
 
@@ -13,7 +12,7 @@ const (
 	defaultHttpRWTimeout          = 10 * time.Second
 	defaultHttpMaxHeaderMegabytes = 1
 
-	defaultConfigPath = "./config/"
+	defaultConfigPath = "./configs/config.yml"
 )
 
 type (
@@ -31,14 +30,14 @@ type (
 	}
 
 	Postgres struct {
-		URI      string
-		User     string `mapstructure:"user"`
-		Name     string `mapstructure:"name"`
+		Host     string `mapstructure:"host"`
+		Port 	 string `mapstructure:"port"`
+		Username     string `mapstructure:"username"`
+		DBName     string `mapstructure:"dbName"`
 		Password string
 	}
 )
 
-//Set up config
 func Init(path string) (*Config, error) {
 	if path == "" {
 		path = defaultConfigPath
@@ -54,8 +53,13 @@ func Init(path string) (*Config, error) {
 	}
 
 	var cfg Config
+	if err := unmarshal(&cfg); err != nil {
+		return nil, err
+	}
+
 	setFromEnv(&cfg)
 
+	return &cfg, nil
 }
 
 func populateDefaults() {
@@ -66,29 +70,28 @@ func populateDefaults() {
 }
 
 func parseConfigFile(filepath string) error {
-	path := strings.Split(filepath, "/")
+	//path := strings.Split(filepath, "/")
 
-	viper.AddConfigPath(path[0]) // folder
-	viper.SetConfigName(path[1]) // config file name
+	viper.AddConfigPath("configs") // folder
+	viper.SetConfigName("config") // config file name
 
 	return viper.ReadInConfig()
 }
 
 func setFromEnv(cfg *Config) {
 	cfg.Postgres.Password = viper.GetString("password")
-	cfg.Postgres.URI = viper.GetString("uri")
 }
 
 func unmarshal(cfg *Config) error {
-	if err := viper.UnmarshalKey("http", cfg.Http); err != nil {
+	if err := viper.UnmarshalKey("http", &cfg.Http); err != nil {
 		return err
 	}
-	return viper.UnmarshalKey("db.postgres", cfg.Postgres)
+	return viper.UnmarshalKey("db.postgres", &cfg.Postgres)
 }
 
 func parseEnv() error {
 	if err := godotenv.Load(); err != nil {
-		pkg.Error("error occurred with environment load")
+		logger.Error("error occurred with environment load")
 	}
 
 	return parsePostgresEnv()
@@ -96,9 +99,5 @@ func parseEnv() error {
 
 func parsePostgresEnv() error {
 	viper.SetEnvPrefix("postgres")
-	if err := viper.BindEnv("password"); err != nil {
-		return err
-	}
-
-	return viper.BindEnv("uri")
+	return viper.BindEnv("password")
 }

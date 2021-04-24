@@ -10,9 +10,9 @@ func (h *Handler) InitUsersRoutes(groupApi *gin.RouterGroup) {
 		users.POST("/SignIn")
 		users.POST("/SignUp")
 
-		authenticated := users.Group("/", h.studentIdentity)
+		/*authenticated := users.Group("/", h.studentIdentity)
 		{
 
-		}
+		}*/
 	}
 }

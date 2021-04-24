@@ -10,14 +10,22 @@ type Server struct {
 	httpServer http.Server
 }
 
-func NewServer(port string, handler http.Handler) *Server {
+type Config struct {
+	Host string
+	Port string
+	MaxHeaderBytes int
+	ReadTimeout time.Duration
+	WriteTimeout time.Duration
+}
+
+func NewServer(cfg Config, handler http.Handler) *Server {
 	return &Server{
 		httpServer: http.Server{
-			Addr:           ":" + port,
+			Addr:           cfg.Host+":"+cfg.Port,
 			Handler:        handler,
-			MaxHeaderBytes: 1 << 20, // 1 MB
-			ReadTimeout:    10 * time.Second,
-			WriteTimeout:   10 * time.Second,
+			MaxHeaderBytes: cfg.MaxHeaderBytes,
+			ReadTimeout:    cfg.ReadTimeout,
+			WriteTimeout:   cfg.WriteTimeout,
 		},
 	}
 }

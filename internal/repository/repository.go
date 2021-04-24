@@ -1,8 +1,10 @@
 package repository
 
-type Repositories struct {
+import "github.com/jmoiron/sqlx"
+
+type Repository struct {
 }
 
-func NewRepositories() *Repositories {
-	return &Repositories{}
+func NewRepositories(db *sqlx.DB) *Repository {
+	return &Repository{}
 }

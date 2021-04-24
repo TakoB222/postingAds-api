@@ -1,14 +1,14 @@
 http:
-  host: localhost
-  port: 8000
-  maxHeaderBytes: 1
-  readTimeout: 10s
-  writeTimeout: 10s
+  host: "localhost"
+  port: "8000"
+  maxHeaderBytes: "1"
+  readTimeout: "10s"
+  writeTimeout: "10s"
 
 db:
   postgres:
-    host:
-    port:
-    username:
-    dbName:
-    SSLMode:
+    host: "db"
+    port: "5432"
+    username: "admin"
+    dbName: "postingAds"
+    SSLMode: "disable"

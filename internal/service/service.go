@@ -1,6 +1,6 @@
 package service
 
-import "github.com/zhashkevych/todo-app/pkg/repository"
+import 	"github.com/TakoB222/postingAds-api/internal/repository"
 
 type Services struct {
 	User  User
