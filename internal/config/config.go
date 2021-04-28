@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"github.com/TakoB222/postingAds-api/pkg/logger"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
@@ -19,6 +20,7 @@ type (
 	Config struct {
 		Http HttpServer
 		Postgres
+		Auth Auth
 	}
 
 	HttpServer struct {
@@ -31,10 +33,17 @@ type (
 
 	Postgres struct {
 		Host     string `mapstructure:"host"`
-		Port 	 string `mapstructure:"port"`
-		Username     string `mapstructure:"username"`
-		DBName     string `mapstructure:"dbName"`
+		Port     string `mapstructure:"port"`
+		Username string `mapstructure:"username"`
+		DBName   string `mapstructure:"dbName"`
 		Password string
+	}
+
+	Auth struct {
+		PasswordSalt    string
+		TokenSigningKey string
+		AccessTokenTTL  time.Duration `mapstructure:"accessTokenTTL"`
+		RefreshTokenTTL time.Duration `mapstructure:"refreshTokenTTL"`
 	}
 )
 
@@ -73,17 +82,22 @@ func parseConfigFile(filepath string) error {
 	//path := strings.Split(filepath, "/")
 
 	viper.AddConfigPath("configs") // folder
-	viper.SetConfigName("config") // config file name
+	viper.SetConfigName("config")  // config file name
 
 	return viper.ReadInConfig()
 }
 
 func setFromEnv(cfg *Config) {
 	cfg.Postgres.Password = viper.GetString("password")
+	cfg.Auth.PasswordSalt = viper.GetString("password_salt")
+	cfg.Auth.TokenSigningKey = viper.GetString("signing_key")
 }
 
 func unmarshal(cfg *Config) error {
 	if err := viper.UnmarshalKey("http", &cfg.Http); err != nil {
+		return err
+	}
+	if err := viper.UnmarshalKey("auth", &cfg.Auth); err != nil {
 		return err
 	}
 	return viper.UnmarshalKey("db.postgres", &cfg.Postgres)
@@ -94,10 +108,22 @@ func parseEnv() error {
 		logger.Error("error occurred with environment load")
 	}
 
+	if err := parseAuthEnv(); err != nil {
+		logger.Error(err.Error())
+	}
+
 	return parsePostgresEnv()
 }
 
 func parsePostgresEnv() error {
 	viper.SetEnvPrefix("postgres")
 	return viper.BindEnv("password")
+}
+
+func parseAuthEnv() error {
+	viper.SetEnvPrefix("auth")
+	if err := viper.BindEnv("password_salt"); err != nil {
+		return errors.New("error occurred with password last environment binding")
+	}
+	return viper.BindEnv("signing_key")
 }

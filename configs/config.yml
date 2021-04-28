@@ -7,8 +7,12 @@ http:
 
 db:
   postgres:
-    host: "db"
-    port: "5432"
-    username: "admin"
+    host: "localhost"
+    port: "5436"
+    username: "artem"
     dbName: "postingAds"
     SSLMode: "disable"
+
+auth:
+  accessTokenTTL: "10m"
+  refreshTokenTTL: "60m"

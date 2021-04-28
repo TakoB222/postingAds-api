@@ -6,6 +6,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+const (
+	UsersTable = "users"
+	AdminsTable = "admins"
+	RefreshSessionsTable = "refreshSessions"
+	AdsTable = "ads"
+	CategoriesTable = "categories"
+	ContactsInfoTable = "contacts_info"
+)
+
 type DBConfig struct {
 	Host     string
 	Port     string

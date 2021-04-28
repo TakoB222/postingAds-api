@@ -12,7 +12,7 @@ const (
 	userContext         = "userId"
 )
 
-func (h *Handler) studentIdentity(ctx *gin.Context) {
+func (h *Handler) userIdentity(ctx *gin.Context) {
 	userId, err := h.parseAuthHeader(ctx)
 	if err != nil {
 		newResponse(ctx, http.StatusUnauthorized, err.Error())

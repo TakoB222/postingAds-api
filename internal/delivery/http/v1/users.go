@@ -5,14 +5,22 @@ import (
 )
 
 func (h *Handler) InitUsersRoutes(groupApi *gin.RouterGroup) {
-	users := groupApi.Group("/users")
+	auth := groupApi.Group("/auth")
 	{
-		users.POST("/SignIn")
-		users.POST("/SignUp")
+		auth.POST("/Sign-In", h.signIn)
+		auth.POST("/Sign-Up", h.signUp)
+		auth.POST("/refreshTokens", h.refreshTokens)
 
-		/*authenticated := users.Group("/", h.studentIdentity)
+		/*api := auth.Group("/api", h.userIdentity)
 		{
-
+			ads := api.Group("/ads")
+			{
+				ads.GET("/", h.getAllAds)
+				ads.POST("/", h.createAd)
+				ads.GET("/:id", h.createAdById)
+				ads.PUT("/:id", h.updateAd)
+				ads.DELETE("/:id", h.deleteAdById)
+			}
 		}*/
 	}
 }

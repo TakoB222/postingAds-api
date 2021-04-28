@@ -11,17 +11,17 @@ type Server struct {
 }
 
 type Config struct {
-	Host string
-	Port string
+	Host           string
+	Port           string
 	MaxHeaderBytes int
-	ReadTimeout time.Duration
-	WriteTimeout time.Duration
+	ReadTimeout    time.Duration
+	WriteTimeout   time.Duration
 }
 
 func NewServer(cfg Config, handler http.Handler) *Server {
 	return &Server{
 		httpServer: http.Server{
-			Addr:           cfg.Host+":"+cfg.Port,
+			Addr:           cfg.Host + ":" + cfg.Port,
 			Handler:        handler,
 			MaxHeaderBytes: cfg.MaxHeaderBytes,
 			ReadTimeout:    cfg.ReadTimeout,
