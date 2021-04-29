@@ -5,7 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type Authorization interface {
+type User interface {
 	CreateUser(user domain.User)(int, error)
 	GetUser(email, password_hash string)(domain.User, error)
 	GetSessionByRefreshToken(refreshToken string)(domain.Session, error)
@@ -21,13 +21,13 @@ type Ad interface {
 }
 
 type Repository struct {
-	Authorization
+	User
 	Admin
 	Ad
 }
 
 func NewRepositories(db *sqlx.DB) *Repository {
 	return &Repository{
-		Authorization: NewAuthRepository(db),
+		User: NewAuthRepository(db),
 	}
 }

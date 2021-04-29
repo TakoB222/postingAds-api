@@ -1,7 +1,6 @@
 package service
 
 import (
-	"crypto/sha1"
 	"fmt"
 	"github.com/TakoB222/postingAds-api/internal/domain"
 	"github.com/TakoB222/postingAds-api/internal/repository"
@@ -10,20 +9,16 @@ import (
 	"time"
 )
 
-const (
-	salt       = "hjqrhjqw124617ajfhajs"
-	signingKey = "qrkjk#4#%35FSFJlja#4353KSFjH"
-	accessTokenTTL   = 30 * time.Minute
-	refreshTokenTTL =  30 * time.Hour
-)
-
 type AuthService struct {
-	repo repository.Authorization
+	repo repository.User
 	tokenManager auth.TokenManager
 	hasher *hash.SHA1Hasher
+
+	AccessTokenTTL time.Duration
+	RefreshTokenTTL time.Duration
 }
 
-func NewAuthService(repo repository.Authorization, tokenManager *auth.Manager, hasher *hash.SHA1Hasher) *AuthService {
+func NewAuthService(repo repository.User, tokenManager *auth.Manager, hasher *hash.SHA1Hasher) *AuthService {
 	return &AuthService{repo: repo, tokenManager: tokenManager, hasher: hasher}
 }
 
@@ -56,7 +51,7 @@ func (s *AuthService) createSession(userId string, ua string, ip string)(Tokens,
 		err error
 	)
 
-	res.AccessToken, err = s.tokenManager.NewJWT(userId, accessTokenTTL)
+	res.AccessToken, err = s.tokenManager.NewJWT(userId, s.AccessTokenTTL)
 	if err != nil {
 		return res, err
 	}
@@ -70,7 +65,7 @@ func (s *AuthService) createSession(userId string, ua string, ip string)(Tokens,
 		UserId: userId,
 		RefreshToken: res.RefreshToken,
 		CreatedAt: time.Now(),
-		ExpiresIn: time.Now().Add(refreshTokenTTL),
+		ExpiresIn: time.Now().Add(s.RefreshTokenTTL),
 		UA: ua,
 		Ip: ip,
 	}
@@ -83,8 +78,8 @@ func (s *AuthService) createSession(userId string, ua string, ip string)(Tokens,
 	return res, nil
 }
 
-func (s *AuthService) RefreshSession(refreshToken string)(Tokens, error) {
-	session, err := s.repo.GetSessionByRefreshToken(refreshToken)
+func (s *AuthService) RefreshSession(input RefreshInput)(Tokens, error) {
+	session, err := s.repo.GetSessionByRefreshToken(input.RefreshToken)
 	if err != nil {
 		return Tokens{}, err
 	}
@@ -95,12 +90,5 @@ func (s *AuthService) RefreshSession(refreshToken string)(Tokens, error) {
 	}
 
 	return s.createSession(session.UserId, session.UA,session.Ip)
-}
-
-func generatePasswordHash(password string) string {
-	hash := sha1.New()
-	hash.Write([]byte(password))
-
-	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }
 

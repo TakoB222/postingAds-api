@@ -36,7 +36,7 @@ func (h *Handler) signIn(ctx *gin.Context){
 		return
 	}
 
-	tokens, err := h.services.Users.SignIn(service.UserSignInInput{
+	tokens, err := h.services.Authorization.SignIn(service.UserSignInInput{
 		Email: input.Email,
 		Password: input.Password,
 		Ua: ctx.GetHeader("User-Agent"),
@@ -57,7 +57,7 @@ func (h *Handler) signUp(ctx *gin.Context){
 		return
 	}
 
-	userId, err := h.services.Users.SignUp(service.UserSignUpInput{
+	userId, err := h.services.Authorization.SignUp(service.UserSignUpInput{
 		FirsName: input.FirstName,
 		LastName: input.LastName,
 		Email: input.Email,
@@ -82,7 +82,9 @@ func (h *Handler) refreshTokens(ctx *gin.Context){
 		return
 	}
 
-	tokens, err := h.services.RefreshSession(refreshInput.RefreshToken)
+	tokens, err := h.services.RefreshSession(service.RefreshInput{
+		RefreshToken: refreshInput.RefreshToken,
+	})
 	if err != nil {
 		newResponse(ctx, http.StatusInternalServerError, err.Error())
 		return

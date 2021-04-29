@@ -50,6 +50,8 @@ func main() {
 		Repository:   repos,
 		TokenManager: dep.tokenManager,
 		Hasher:       dep.hasher,
+		AccessTokenTTL: cfg.Auth.AccessTokenTTL,
+		RefreshTokenTTL: cfg.Auth.RefreshTokenTTL,
 	})
 	handler := http.NewHandler(service, dep.tokenManager)
 
@@ -76,6 +78,10 @@ func main() {
 
 	if err := server.Shutdown(ctx); err != nil {
 		logger.Errorf("failed to stop server: %v", err)
+	}
+
+	if err := db.Close(); err != nil {
+		logger.Errorf("failed to stop db: %v", err)
 	}
 }
 

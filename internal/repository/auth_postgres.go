@@ -65,7 +65,6 @@ func (r *AuthRepository)DeleteSessionByUserId(userId string) error {
 	return nil
 }
 
-
 func (r *AuthRepository)SetSession(session domain.Session) error {
 	query := fmt.Sprintf("Insert into %s (userId, refreshToken, ua, ip, expiresIn, createdAt) values ($1,$2,$3,$4,$5,$6)", database.RefreshSessionsTable)
 	_, err := r.db.Exec(query, session.UserId, session.RefreshToken, session.UA, session.Ip, session.ExpiresIn, session.CreatedAt)
