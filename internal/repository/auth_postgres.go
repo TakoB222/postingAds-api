@@ -15,7 +15,7 @@ func NewAuthRepository(db *sqlx.DB) *AuthRepository {
 	return &AuthRepository{db: db}
 }
 
-func (r *AuthRepository)CreateUser(user domain.User)(int, error){
+func (r *AuthRepository) CreateUser(user domain.User) (int, error) {
 	var id int
 	query := fmt.Sprintf("insert into %s (email, password_hash, first_name, last_name, registered_At) values ($1, $2, $3, $4, $5) returning id", database.UsersTable)
 
@@ -28,7 +28,7 @@ func (r *AuthRepository)CreateUser(user domain.User)(int, error){
 	return id, nil
 }
 
-func (r *AuthRepository)GetUser(email, password_hash string)(domain.User, error) {
+func (r *AuthRepository) GetUser(email, password_hash string) (domain.User, error) {
 	var user domain.User
 
 	query := fmt.Sprintf("Select id from %s where email=$1 and password_hash=$2", database.UsersTable)
@@ -41,7 +41,7 @@ func (r *AuthRepository)GetUser(email, password_hash string)(domain.User, error)
 	return user, err
 }
 
-func (r *AuthRepository)GetSessionByRefreshToken(refreshToken string)(domain.Session, error){
+func (r *AuthRepository) GetSessionByRefreshToken(refreshToken string) (domain.Session, error) {
 	//TODO: if ua and ip wrong, what then...
 	var session domain.Session
 
@@ -54,7 +54,7 @@ func (r *AuthRepository)GetSessionByRefreshToken(refreshToken string)(domain.Ses
 	return session, nil
 }
 
-func (r *AuthRepository)DeleteSessionByUserId(userId string) error {
+func (r *AuthRepository) DeleteSessionByUserId(userId string) error {
 	query := fmt.Sprintf("delete from %s where userId=$1", database.RefreshSessionsTable)
 
 	_, err := r.db.Exec(query, userId)
@@ -65,7 +65,7 @@ func (r *AuthRepository)DeleteSessionByUserId(userId string) error {
 	return nil
 }
 
-func (r *AuthRepository)SetSession(session domain.Session) error {
+func (r *AuthRepository) SetSession(session domain.Session) error {
 	query := fmt.Sprintf("Insert into %s (userId, refreshToken, ua, ip, expiresIn, createdAt) values ($1,$2,$3,$4,$5,$6)", database.RefreshSessionsTable)
 	_, err := r.db.Exec(query, session.UserId, session.RefreshToken, session.UA, session.Ip, session.ExpiresIn, session.CreatedAt)
 	if err != nil {

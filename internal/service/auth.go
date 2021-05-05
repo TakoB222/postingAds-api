@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/TakoB222/postingAds-api/internal/domain"
 	"github.com/TakoB222/postingAds-api/internal/repository"
 	"github.com/TakoB222/postingAds-api/pkg/auth"
@@ -10,33 +9,32 @@ import (
 )
 
 type AuthService struct {
-	repo repository.User
+	repo         repository.User
 	tokenManager auth.TokenManager
-	hasher *hash.SHA1Hasher
+	hasher       *hash.SHA1Hasher
 
-	AccessTokenTTL time.Duration
+	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
 }
 
-func NewAuthService(repo repository.User, tokenManager *auth.Manager, hasher *hash.SHA1Hasher) *AuthService {
-	return &AuthService{repo: repo, tokenManager: tokenManager, hasher: hasher}
+func NewAuthService(repo repository.User, tokenManager *auth.Manager, hasher *hash.SHA1Hasher, AccesTokenTTL, RefreshTokenTTL time.Duration) *AuthService {
+	return &AuthService{repo: repo, tokenManager: tokenManager, hasher: hasher, AccessTokenTTL: AccesTokenTTL, RefreshTokenTTL: RefreshTokenTTL}
 }
 
 func (s *AuthService) SignUp(input UserSignUpInput) (int, error) {
 	user := domain.User{
-		Email: input.Email,
+		Email:         input.Email,
 		Password_hash: s.hasher.Hash(input.Password),
-		First_name: input.FirsName,
-		Last_name: input.LastName,
+		First_name:    input.FirsName,
+		Last_name:     input.LastName,
 		Registered_at: time.Now(),
 	}
 
 	return s.repo.CreateUser(user)
 }
 
-func (s *AuthService) SignIn(input UserSignInInput)(Tokens, error){
+func (s *AuthService) SignIn(input UserSignInInput) (Tokens, error) {
 	user, err := s.repo.GetUser(input.Email, s.hasher.Hash(input.Password))
-	fmt.Println("userid - ", user.Id)
 	if err != nil {
 		//TODO: create custom repository errors and handle them here
 		return Tokens{}, err
@@ -45,13 +43,14 @@ func (s *AuthService) SignIn(input UserSignInInput)(Tokens, error){
 	return s.createSession(user.Id, input.Ua, input.Ip)
 }
 
-func (s *AuthService) createSession(userId string, ua string, ip string)(Tokens, error) {
+func (s *AuthService) createSession(userId string, ua string, ip string) (Tokens, error) {
 	var (
 		res Tokens
 		err error
 	)
 
 	res.AccessToken, err = s.tokenManager.NewJWT(userId, s.AccessTokenTTL)
+
 	if err != nil {
 		return res, err
 	}
@@ -62,12 +61,12 @@ func (s *AuthService) createSession(userId string, ua string, ip string)(Tokens,
 	}
 
 	session := domain.Session{
-		UserId: userId,
+		UserId:       userId,
 		RefreshToken: res.RefreshToken,
-		CreatedAt: time.Now(),
-		ExpiresIn: time.Now().Add(s.RefreshTokenTTL),
-		UA: ua,
-		Ip: ip,
+		CreatedAt:    time.Now(),
+		ExpiresIn:    time.Now().Add(s.RefreshTokenTTL),
+		UA:           ua,
+		Ip:           ip,
 	}
 
 	err = s.repo.SetSession(session)
@@ -78,7 +77,7 @@ func (s *AuthService) createSession(userId string, ua string, ip string)(Tokens,
 	return res, nil
 }
 
-func (s *AuthService) RefreshSession(input RefreshInput)(Tokens, error) {
+func (s *AuthService) RefreshSession(input RefreshInput) (Tokens, error) {
 	session, err := s.repo.GetSessionByRefreshToken(input.RefreshToken)
 	if err != nil {
 		return Tokens{}, err
@@ -89,6 +88,5 @@ func (s *AuthService) RefreshSession(input RefreshInput)(Tokens, error) {
 		return Tokens{}, err
 	}
 
-	return s.createSession(session.UserId, session.UA,session.Ip)
+	return s.createSession(session.UserId, session.UA, session.Ip)
 }
-

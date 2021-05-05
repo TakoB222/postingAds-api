@@ -8,13 +8,13 @@ import (
 
 type (
 	signInInput struct {
-		Email string `json:"email" binding:"required"`
+		Email    string `json:"email" binding:"required"`
 		Password string `json:"password" binding:"required"`
 	}
 
 	signUpInput struct {
 		FirstName string `json:"firstName" binding:"required"`
-		LastName string `json:"lastName" binding:"required"`
+		LastName  string `json:"lastName" binding:"required"`
 		Email     string `json:"email" binding:"required"`
 		Password  string `json:"password" binding:"required"`
 	}
@@ -23,13 +23,13 @@ type (
 		RefreshToken string `json:"RefreshToken" binding:"required"`
 	}
 
-    tokenResponse struct {
+	tokenResponse struct {
 		AccessToken  string `json:"accessToken"`
 		RefreshToken string `json:"refreshToken"`
 	}
 )
 
-func (h *Handler) signIn(ctx *gin.Context){
+func (h *Handler) signIn(ctx *gin.Context) {
 	var input signInInput
 	if err := ctx.BindJSON(&input); err != nil {
 		newResponse(ctx, http.StatusBadRequest, "invalid input body")
@@ -37,10 +37,10 @@ func (h *Handler) signIn(ctx *gin.Context){
 	}
 
 	tokens, err := h.services.Authorization.SignIn(service.UserSignInInput{
-		Email: input.Email,
+		Email:    input.Email,
 		Password: input.Password,
-		Ua: ctx.GetHeader("User-Agent"),
-		Ip: ctx.Request.RemoteAddr,
+		Ua:       ctx.GetHeader("User-Agent"),
+		Ip:       ctx.Request.RemoteAddr,
 	})
 	if err != nil {
 		newResponse(ctx, http.StatusInternalServerError, err.Error())
@@ -50,9 +50,9 @@ func (h *Handler) signIn(ctx *gin.Context){
 	ctx.JSON(http.StatusOK, tokens)
 }
 
-func (h *Handler) signUp(ctx *gin.Context){
+func (h *Handler) signUp(ctx *gin.Context) {
 	var input signUpInput
-	if err := ctx.BindJSON(&input); err != nil{
+	if err := ctx.BindJSON(&input); err != nil {
 		newResponse(ctx, http.StatusBadRequest, "invalid input body")
 		return
 	}
@@ -60,7 +60,7 @@ func (h *Handler) signUp(ctx *gin.Context){
 	userId, err := h.services.Authorization.SignUp(service.UserSignUpInput{
 		FirsName: input.FirstName,
 		LastName: input.LastName,
-		Email: input.Email,
+		Email:    input.Email,
 		Password: input.Password,
 	})
 
@@ -70,11 +70,11 @@ func (h *Handler) signUp(ctx *gin.Context){
 	}
 
 	ctx.JSON(http.StatusCreated, map[string]interface{}{
-		"id":userId,
+		"id": userId,
 	})
 }
 
-func (h *Handler) refreshTokens(ctx *gin.Context){
+func (h *Handler) refreshTokens(ctx *gin.Context) {
 	var refreshInput refreshTokensInput
 
 	if err := ctx.BindJSON(&refreshInput); err != nil {
@@ -92,4 +92,3 @@ func (h *Handler) refreshTokens(ctx *gin.Context){
 
 	ctx.JSON(http.StatusCreated, tokens)
 }
-

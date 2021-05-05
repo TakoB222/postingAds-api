@@ -11,16 +11,16 @@ func (h *Handler) InitUsersRoutes(groupApi *gin.RouterGroup) {
 		auth.POST("/Sign-Up", h.signUp)
 		auth.POST("/refreshTokens", h.refreshTokens)
 
-		/*api := auth.Group("/api", h.userIdentity)
+		api := auth.Group("/api", h.userIdentity)
 		{
 			ads := api.Group("/ads")
 			{
 				ads.GET("/", h.getAllAds)
 				ads.POST("/", h.createAd)
-				ads.GET("/:id", h.createAdById)
+				ads.GET("/:id", h.getAdById)
 				ads.PUT("/:id", h.updateAd)
-				ads.DELETE("/:id", h.deleteAdById)
+				ads.DELETE("/:id", h.deleteAd)
 			}
-		}*/
+		}
 	}
 }

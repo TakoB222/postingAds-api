@@ -14,5 +14,5 @@ db:
     SSLMode: "disable"
 
 auth:
-  accessTokenTTL: "10m"
+  accessTokenTTL: "30m"
   refreshTokenTTL: "60m"

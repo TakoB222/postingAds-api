@@ -47,10 +47,10 @@ func main() {
 
 	repos := repository.NewRepositories(db)
 	service := service.NewServices(service.Dependencies{
-		Repository:   repos,
-		TokenManager: dep.tokenManager,
-		Hasher:       dep.hasher,
-		AccessTokenTTL: cfg.Auth.AccessTokenTTL,
+		Repository:      repos,
+		TokenManager:    dep.tokenManager,
+		Hasher:          dep.hasher,
+		AccessTokenTTL:  cfg.Auth.AccessTokenTTL,
 		RefreshTokenTTL: cfg.Auth.RefreshTokenTTL,
 	})
 	handler := http.NewHandler(service, dep.tokenManager)

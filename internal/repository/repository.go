@@ -5,10 +5,34 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+const (
+	//TODO: create custom errors
+	ErrorEmptyResult = "empty result"
+)
+
+type (
+	Ads struct {
+		Title       string   `json:"title"`
+		Category    string   `json:"category"`
+		Description string   `json:"description"`
+		Price       int      `json:"price"`
+		Contacts    Contacts `json:"contacts"`
+		Published   bool     `json:"published"`
+		ImagesURL   []string `json:"images_url"`
+	}
+
+	Contacts struct {
+		Name         string `json:"name"`
+		Phone_number string `json:"phone_number"`
+		Email        string `json:"email"`
+		Location     string `json:"location"`
+	}
+)
+
 type User interface {
-	CreateUser(user domain.User)(int, error)
-	GetUser(email, password_hash string)(domain.User, error)
-	GetSessionByRefreshToken(refreshToken string)(domain.Session, error)
+	CreateUser(user domain.User) (int, error)
+	GetUser(email, password_hash string) (domain.User, error)
+	GetSessionByRefreshToken(refreshToken string) (domain.Session, error)
 	DeleteSessionByUserId(userId string) error
 	SetSession(session domain.Session) error
 }
@@ -17,7 +41,11 @@ type Admin interface {
 }
 
 type Ad interface {
-
+	GetAllAdsByUserId(userId string) ([]domain.Ad, error)
+	CreateAd(userId string, input Ads) (int, error)
+	GetAdById(userId string, adId string)([]domain.Ad, error)
+	UpdateAd(userId string, adId string, ad Ads) error
+	DeleteAd(userId string, adId string) error
 }
 
 type Repository struct {
@@ -29,5 +57,6 @@ type Repository struct {
 func NewRepositories(db *sqlx.DB) *Repository {
 	return &Repository{
 		User: NewAuthRepository(db),
+		Ad:   NewAdRepository(db),
 	}
 }

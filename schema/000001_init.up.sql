@@ -55,3 +55,25 @@ create table ads
     images_url  varchar[]                                           not null
 );
 
+insert into categories(category)
+values ('Транспорт'); -- 1
+insert into categories(category, parent_category)
+values ('Автобусы', 1),
+       ('Водный транспорт', 1),
+       ('Мототехника', 1),
+       ('Прицепы', 1);
+insert into categories(category)
+values ('Одежда и Обувь'); -- 6
+insert into categories(category, parent_category)
+values ('Аксессуары', 6),
+       ('Женская обувь', 6),
+       ('Женская одежда', 6),
+       ('Мужская обувь', 6),
+       ('Другое', 6);
+insert into categories(category)
+values ('Недвижимость'); -- 12
+insert into categories(category, parent_category)
+values ('Аренда домов', 12),
+       ('Аренда квартир', 12),
+       ('Продажа квартир', 12),
+       ('Продажа домов', 12);
