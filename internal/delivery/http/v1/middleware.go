@@ -9,7 +9,9 @@ import (
 
 const (
 	authorizationHeader = "Authorization"
-	userContext         = "userId"
+
+	userContext  = "userId"
+	adminContext = "adminId"
 )
 
 func (h *Handler) userIdentity(ctx *gin.Context) {
@@ -19,6 +21,15 @@ func (h *Handler) userIdentity(ctx *gin.Context) {
 	}
 
 	ctx.Set(userContext, userId)
+}
+
+func (h *Handler) adminIdentity(ctx *gin.Context) {
+	adminId, err := h.parseAuthHeader(ctx)
+	if err != nil {
+		newResponse(ctx, http.StatusUnauthorized, err.Error())
+	}
+
+	ctx.Set(adminContext, adminId)
 }
 
 func (h *Handler) parseAuthHeader(ctx *gin.Context) (string, error) {

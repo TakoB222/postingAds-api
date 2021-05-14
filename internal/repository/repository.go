@@ -38,12 +38,20 @@ type User interface {
 }
 
 type Admin interface {
+	GetAdminId(email, password_hash string) (string, error)
+	GetAdminSessionByRefreshToken(refrehsToken string) (domain.AdminSession, error)
+	DeleteAdminSessionByAdminId(adminId string) error
+	SetAdminSession(session domain.AdminSession) error
+	GetAllAdsByAdmin() ([]domain.Ad, error)
+	GetAd(adId string) (domain.Ad, error)
+	AdminDeleteAd(adId string) error
+	AdminUpdateAd(adId string, ad Ads) error
 }
 
 type Ad interface {
 	GetAllAdsByUserId(userId string) ([]domain.Ad, error)
 	CreateAd(userId string, input Ads) (int, error)
-	GetAdById(userId string, adId string)([]domain.Ad, error)
+	GetAdById(userId string, adId string) ([]domain.Ad, error)
 	UpdateAd(userId string, adId string, ad Ads) error
 	DeleteAd(userId string, adId string) error
 }
@@ -56,7 +64,8 @@ type Repository struct {
 
 func NewRepositories(db *sqlx.DB) *Repository {
 	return &Repository{
-		User: NewAuthRepository(db),
-		Ad:   NewAdRepository(db),
+		User:  NewAuthRepository(db),
+		Ad:    NewAdRepository(db),
+		Admin: NewAdminRepository(db),
 	}
 }

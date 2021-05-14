@@ -9,6 +9,118 @@ import (
 	"strings"
 )
 
+func (h *Handler) InitUsersRoutes(groupApi *gin.RouterGroup) {
+	auth := groupApi.Group("/auth")
+	{
+		auth.POST("/Sign-In", h.signIn)
+		auth.POST("/Sign-Up", h.signUp)
+		auth.POST("/refreshTokens", h.refreshTokens)
+
+		api := auth.Group("/api", h.userIdentity)
+		{
+			ads := api.Group("/ads")
+			{
+				ads.GET("/", h.getAllAds)
+				ads.POST("/", h.createAd)
+				ads.GET("/:id", h.getAdById)
+				ads.PUT("/:id", h.updateAd)
+				ads.DELETE("/:id", h.deleteAd)
+			}
+		}
+	}
+}
+
+type (
+	signInInput struct {
+		Email    string `json:"email" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
+
+	signUpInput struct {
+		FirstName string `json:"firstName" binding:"required"`
+		LastName  string `json:"lastName" binding:"required"`
+		Email     string `json:"email" binding:"required"`
+		Password  string `json:"password" binding:"required"`
+	}
+
+	refreshTokensInput struct {
+		RefreshToken string `json:"RefreshToken" binding:"required"`
+	}
+
+	tokenResponse struct {
+		AccessToken  string `json:"accessToken"`
+		RefreshToken string `json:"refreshToken"`
+	}
+)
+
+//------------------Authorization------------------
+
+func (h *Handler) signIn(ctx *gin.Context) {
+	var input signInInput
+	if err := ctx.BindJSON(&input); err != nil {
+		newResponse(ctx, http.StatusBadRequest, "invalid input body")
+		return
+	}
+
+	tokens, err := h.services.Authorization.SignIn(service.SignInInput{
+		Email:    input.Email,
+		Password: input.Password,
+		Ua:       ctx.GetHeader("User-Agent"),
+		Ip:       ctx.Request.RemoteAddr,
+	})
+	if err != nil {
+		newResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, tokens)
+}
+
+func (h *Handler) signUp(ctx *gin.Context) {
+	var input signUpInput
+	if err := ctx.BindJSON(&input); err != nil {
+		newResponse(ctx, http.StatusBadRequest, "invalid input body")
+		return
+	}
+
+	userId, err := h.services.Authorization.SignUp(service.UserSignUpInput{
+		FirsName: input.FirstName,
+		LastName: input.LastName,
+		Email:    input.Email,
+		Password: input.Password,
+	})
+
+	if err != nil {
+		newResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, map[string]interface{}{
+		"id": userId,
+	})
+}
+
+func (h *Handler) refreshTokens(ctx *gin.Context) {
+	var refreshInput refreshTokensInput
+
+	if err := ctx.BindJSON(&refreshInput); err != nil {
+		newResponse(ctx, http.StatusBadRequest, "invalid input body")
+		return
+	}
+
+	tokens, err := h.services.RefreshSession(service.RefreshInput{
+		RefreshToken: refreshInput.RefreshToken,
+	})
+	if err != nil {
+		newResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, tokens)
+}
+
+//------------------Ads------------------
+
 //TODO: create input data struct validator
 
 type (

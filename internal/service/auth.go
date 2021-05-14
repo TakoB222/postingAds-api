@@ -33,7 +33,7 @@ func (s *AuthService) SignUp(input UserSignUpInput) (int, error) {
 	return s.repo.CreateUser(user)
 }
 
-func (s *AuthService) SignIn(input UserSignInInput) (Tokens, error) {
+func (s *AuthService) SignIn(input SignInInput) (Tokens, error) {
 	user, err := s.repo.GetUser(input.Email, s.hasher.Hash(input.Password))
 	if err != nil {
 		//TODO: create custom repository errors and handle them here

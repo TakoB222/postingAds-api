@@ -1,4 +1,4 @@
-create table users
+create table if not exists users
 (
     id            serial       not null unique,
     email         varchar(255) not null unique,
@@ -8,7 +8,7 @@ create table users
     registered_at timestamp    not null default now()
 );
 
-create table refreshSessions
+create table if not exists refreshSessions
 (
     id           serial                    not null unique,
     userId       int references users (id) not null,
@@ -19,21 +19,30 @@ create table refreshSessions
     createdAt    timestamp                 not null default now()
 );
 
-create table admin_users
+create table if not exists admins
 (
     id            serial       not null unique,
     login         varchar(255) not null,
     password_hash varchar(255) not null
 );
 
-create table categories
+create table if not exists adminsRefreshSessions
+(
+    id           serial                     not null unique,
+    adminId      int references admins (id) not null,
+    refreshToken varchar(255)               not null,
+    expiresIn    timestamp                  not null default now(),
+    createdAt    timestamp                  not null default now()
+);
+
+create table if not exists categories
 (
     id              serial       not null unique,
     category        varchar(255) not null,
     parent_category int references categories (id)
 );
 
-create table contacts_info
+create table if not exists contacts_info
 (
     id           serial       not null unique,
     name         varchar      not null,
@@ -42,7 +51,7 @@ create table contacts_info
     location     varchar(255) not null default 'Kiev'
 );
 
-create table ads
+create table if not exists ads
 (
     id          serial                                              not null unique,
     userId      int references users (id) on delete cascade         not null,
@@ -77,3 +86,8 @@ values ('Аренда домов', 12),
        ('Аренда квартир', 12),
        ('Продажа квартир', 12),
        ('Продажа домов', 12);
+
+insert into admins (login, password_hash)
+values ('admin1@gmail.com', '6473667364666d31336b326d444d4b53464d53444b469347bb6d872adfd5180cbab2fa8fd64014064e45'); --password - dfghjk1503
+insert into admins (login, password_hash)
+values ('admin2@gmail.com', '6473667364666d31336b326d444d4b53464d53444b469f8d826c82de9b38b0572acbd7cc465bcc424831'); --password - dfghjk

@@ -1,83 +1,104 @@
 package repository
 
 import (
-	"errors"
 	"fmt"
 	"github.com/TakoB222/postingAds-api/internal/domain"
 	"github.com/TakoB222/postingAds-api/pkg/database"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
+	"strconv"
 	"strings"
 )
 
-type AdRepository struct {
+type AdminRepository struct {
 	db *sqlx.DB
 }
 
-func NewAdRepository(db *sqlx.DB) *AdRepository {
-	return &AdRepository{db: db}
+func NewAdminRepository(db *sqlx.DB) *AdminRepository {
+	return &AdminRepository{db: db}
 }
 
-func (r *AdRepository) GetAllAdsByUserId(userId string) ([]domain.Ad, error) {
+func (r *AdminRepository) GetAdminId(email, password_hash string) (string, error) {
+	var id int
+
+	query := fmt.Sprintf("select id from %s where login=$1 and password_hash=$2", database.AdminsTable)
+	if err := r.db.Get(&id, query, email, password_hash); err != nil {
+		return "", err
+	}
+
+	return strconv.Itoa(id), nil
+}
+
+func (r *AdminRepository) SetAdminSession(session domain.AdminSession) error {
+	query := fmt.Sprintf("insert into %s (adminid, refreshtoken, expiresin, createdat) values ($1, $2, $3, $4)", database.AdminRefreshSessionTable)
+	if _, err := r.db.Exec(query, session.AdminId, session.RefreshToken, session.ExpiresIn, session.CreatedAt); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *AdminRepository) GetAdminSessionByRefreshToken(refrehsToken string) (domain.AdminSession, error) {
+	var session domain.AdminSession
+	query := fmt.Sprintf("select * from %s where refreshtoken=$1", database.AdminRefreshSessionTable)
+	if err := r.db.Get(&session, query, refrehsToken); err != nil {
+		return domain.AdminSession{}, err
+	}
+
+	return session, nil
+}
+
+func (r *AdminRepository) DeleteAdminSessionByAdminId(adminId string) error {
+	query := fmt.Sprintf("delete from %s where adminid=$1", database.AdminRefreshSessionTable)
+	if _, err := r.db.Exec(query, adminId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *AdminRepository) GetAllAdsByAdmin() ([]domain.Ad, error) {
 	var ads []domain.Ad
 
-	query := fmt.Sprintf("select * from %s where userid=$1", database.AdsTable)
-
-	if err := r.db.Select(&ads, query, userId); err != nil {
+	query := fmt.Sprintf("select * from %s", database.AdsTable)
+	if err := r.db.Select(&ads, query); err != nil {
 		return nil, err
 	}
 
 	return ads, nil
 }
 
-func (r *AdRepository) CreateAd(userId string, input Ads) (int, error) {
-	tx, err := r.db.Begin()
-	if err != nil {
-		return 0, err
-	}
+func (r *AdminRepository) GetAd(adId string) (domain.Ad, error) {
+	var ad domain.Ad
 
-	var category int
-	query := fmt.Sprintf("select id from %s where category=$1", database.CategoriesTable)
-	err = r.db.Get(&category, query, input.Category)
-	if err != nil {
-		return 0, err
-	}
-
-	var contactId int
-	query = fmt.Sprintf("insert into %s (name, phone_number, email, location) values ($1, $2, $3, $4) returning id", database.ContactsInfoTable)
-	row := tx.QueryRow(query, input.Contacts.Name, input.Contacts.Phone_number, input.Contacts.Email, input.Contacts.Location)
-	if err := row.Scan(&contactId); err != nil {
-		tx.Rollback()
-		return 0, err
-	}
-
-	var adId int
-	query = fmt.Sprintf("insert into %s (userid, title, category_id, description, price, contacts_id, published, images_url) values ($1, $2, $3, $4, $5, $6, $7, $8) returning id", database.AdsTable)
-	row = tx.QueryRow(query, userId, input.Title, category, input.Description, input.Price, contactId, input.Published, pq.Array(input.ImagesURL))
-	if err := row.Scan(&adId); err != nil {
-		tx.Rollback()
-		return 0, err
-	}
-
-	return adId, tx.Commit()
-}
-
-func (r *AdRepository) GetAdById(userId string, adId string) ([]domain.Ad, error) {
-	var ad []domain.Ad
-
-	query := fmt.Sprintf("select * from %s where userid=$1 and id=$2", database.AdsTable)
-	if err := r.db.Select(&ad, query, userId, adId); err != nil {
-		return []domain.Ad{}, err
+	query := fmt.Sprintf("select * from %s where id=$1", database.AdsTable)
+	if err := r.db.Get(&ad, query, adId); err != nil {
+		return domain.Ad{}, err
 	}
 
 	return ad, nil
 }
 
-func (r *AdRepository) UpdateAd(userId string, adId string, ad Ads) error {
+func (r *AdminRepository) AdminDeleteAd(adId string) error {
+	query := fmt.Sprintf("delete from %s where id=$1", database.AdsTable)
+	if _, err := r.db.Exec(query, adId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *AdminRepository) AdminUpdateAd(adId string, ad Ads) error {
 	var categoryId int
 	query := fmt.Sprintf("select id from %s where category=$1", database.CategoriesTable)
 	if err := r.db.Get(&categoryId, query, ad.Category); err != nil {
-		return errors.New("here")
+		return err
+	}
+
+	var userId string
+	query = fmt.Sprintf("select userid from %s where id=$1", database.AdsTable)
+	if err := r.db.Get(&userId, query, adId); err != nil {
+		return err
 	}
 
 	var contactsId int
@@ -153,13 +174,4 @@ func (r *AdRepository) UpdateAd(userId string, adId string, ad Ads) error {
 	}
 
 	return tx.Commit()
-}
-
-func (r *AdRepository) DeleteAd(userId string, adId string) error {
-	query := fmt.Sprintf("delete from %s where id=$1 and userid=$2", database.AdsTable)
-	if _, err := r.db.Exec(query, adId, userId); err != nil {
-		return err
-	}
-
-	return nil
 }

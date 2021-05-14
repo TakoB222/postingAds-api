@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	UserSignInInput struct {
+	SignInInput struct {
 		Email    string
 		Password string
 		Ua       string //user-agent
@@ -55,17 +55,23 @@ type (
 
 type Authorization interface {
 	SignUp(input UserSignUpInput) (int, error)
-	SignIn(input UserSignInInput) (Tokens, error)
+	SignIn(input SignInInput) (Tokens, error)
 	RefreshSession(input RefreshInput) (Tokens, error)
 }
 
 type Admin interface {
+	AdminSignIn(input SignInInput) (Tokens, error)
+	AdminRefreshSession(input RefreshInput) (Tokens, error)
+	AdminGetAllAdsByAdmin() ([]domain.Ad, error)
+	AdminGetAd(adId string) (domain.Ad, error)
+	AdminDeleteUserAdById(adId string) error
+	AdminUpdateAd(adId string, ad Ads) error
 }
 
 type Ad interface {
 	GetAllAds(userId string) ([]domain.Ad, error)
 	CreateAd(userId string, adInput Ads) (int, error)
-	GetAdById(userId string, adId string)([]domain.Ad, error)
+	GetAdById(userId string, adId string) ([]domain.Ad, error)
 	UpdateAd(userId, adId string, ad Ads) error
 	DeleteAd(userId string, adId string) error
 }
@@ -89,5 +95,6 @@ func NewServices(dep Dependencies) *Service {
 	return &Service{
 		Authorization: NewAuthService(dep.Repository, dep.TokenManager, dep.Hasher, dep.AccessTokenTTL, dep.RefreshTokenTTL),
 		Ad:            NewAdService(dep.Repository),
+		Admin:         NewAdminService(dep.Repository, dep.TokenManager, dep.Hasher, dep.AccessTokenTTL, dep.RefreshTokenTTL),
 	}
 }

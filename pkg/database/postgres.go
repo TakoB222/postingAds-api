@@ -13,6 +13,7 @@ const (
 	AdsTable = "ads"
 	CategoriesTable = "categories"
 	ContactsInfoTable = "contacts_info"
+	AdminRefreshSessionTable = "adminsRefreshSessions"
 )
 
 type DBConfig struct {
