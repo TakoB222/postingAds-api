@@ -58,8 +58,6 @@ func (h *Handler) adminSignIn(ctx *gin.Context) {
 	tokens, err := h.services.Admin.AdminSignIn(service.SignInInput{
 		Email:    input.Email,
 		Password: input.Password,
-		Ua:       ctx.GetHeader("User-Agent"),
-		Ip:       ctx.Request.RemoteAddr,
 	})
 	if err != nil {
 		newResponse(ctx, http.StatusInternalServerError, err.Error())

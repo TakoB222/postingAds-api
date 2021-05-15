@@ -8,12 +8,12 @@ import (
 	"time"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
 type (
 	SignInInput struct {
 		Email    string
 		Password string
-		Ua       string //user-agent
-		Ip       string
 	}
 
 	UserSignUpInput struct {
@@ -25,8 +25,6 @@ type (
 
 	RefreshInput struct {
 		RefreshToken string `json:"refreshToken"`
-		Ua           string `json:"ua"`
-		Ip           string `json:"ip"`
 	}
 
 	Tokens struct {

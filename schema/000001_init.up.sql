@@ -13,8 +13,6 @@ create table if not exists refreshSessions
     id           serial                    not null unique,
     userId       int references users (id) not null,
     refreshToken varchar(255)              not null,
-    ua           varchar(255),
-    ip           varchar(255),
     expiresIn    timestamp                 not null default now(),
     createdAt    timestamp                 not null default now()
 );

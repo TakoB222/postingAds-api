@@ -40,10 +40,10 @@ func (s *AuthService) SignIn(input SignInInput) (Tokens, error) {
 		return Tokens{}, err
 	}
 
-	return s.createSession(user.Id, input.Ua, input.Ip)
+	return s.createSession(user.Id)
 }
 
-func (s *AuthService) createSession(userId string, ua string, ip string) (Tokens, error) {
+func (s *AuthService) createSession(userId string) (Tokens, error) {
 	var (
 		res Tokens
 		err error
@@ -65,8 +65,6 @@ func (s *AuthService) createSession(userId string, ua string, ip string) (Tokens
 		RefreshToken: res.RefreshToken,
 		CreatedAt:    time.Now(),
 		ExpiresIn:    time.Now().Add(s.RefreshTokenTTL),
-		UA:           ua,
-		Ip:           ip,
 	}
 
 	err = s.repo.SetSession(session)
@@ -88,5 +86,5 @@ func (s *AuthService) RefreshSession(input RefreshInput) (Tokens, error) {
 		return Tokens{}, err
 	}
 
-	return s.createSession(session.UserId, session.UA, session.Ip)
+	return s.createSession(session.UserId)
 }

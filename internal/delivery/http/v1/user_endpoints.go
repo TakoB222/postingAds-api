@@ -2,7 +2,6 @@ package v1
 
 import (
 	"errors"
-	"github.com/TakoB222/postingAds-api/internal/repository"
 	"github.com/TakoB222/postingAds-api/internal/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -65,8 +64,6 @@ func (h *Handler) signIn(ctx *gin.Context) {
 	tokens, err := h.services.Authorization.SignIn(service.SignInInput{
 		Email:    input.Email,
 		Password: input.Password,
-		Ua:       ctx.GetHeader("User-Agent"),
-		Ip:       ctx.Request.RemoteAddr,
 	})
 	if err != nil {
 		newResponse(ctx, http.StatusInternalServerError, err.Error())
@@ -150,20 +147,16 @@ func (h *Handler) getAllAds(ctx *gin.Context) {
 
 	ads, err := h.services.GetAllAds(userId)
 	if err != nil {
-		if err.Error() == repository.ErrorEmptyResult {
-			newResponse(ctx, http.StatusNotFound, err.Error())
-			return
-		}
 		newResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	ctx.JSON(http.StatusFound, ads)
+	ctx.JSON(http.StatusOK, ads)
 }
 
 func (h *Handler) createAd(ctx *gin.Context) {
-	var inputAds inputAd
-	if err := ctx.BindJSON(&inputAds); err != nil {
+	var inputAd inputAd
+	if err := ctx.BindJSON(&inputAd); err != nil {
 		newResponse(ctx, http.StatusBadRequest, "invalid input body")
 		return
 	}
@@ -174,21 +167,18 @@ func (h *Handler) createAd(ctx *gin.Context) {
 		return
 	}
 
-	if category := strings.Split(inputAds.Category, "/"); len(category) > 0 {
-		inputAds.Category = category[len(category)-1]
-	} else {
-		newResponse(ctx, http.StatusBadRequest, "empty category body")
-		return
+	if category := strings.Split(inputAd.Category, "/"); len(category) > 0 {
+		inputAd.Category = category[len(category)-1]
 	}
 
 	adId, err := h.services.Ad.CreateAd(userId, service.Ads{
-		Title:       inputAds.Title,
-		Category:    inputAds.Category,
-		Description: inputAds.Description,
-		Price:       inputAds.Price,
-		Contacts:    service.Contacts(inputAds.Contacts),
-		Published:   inputAds.Published,
-		ImagesURL:   inputAds.ImagesURL,
+		Title:       inputAd.Title,
+		Category:    inputAd.Category,
+		Description: inputAd.Description,
+		Price:       inputAd.Price,
+		Contacts:    service.Contacts(inputAd.Contacts),
+		Published:   inputAd.Published,
+		ImagesURL:   inputAd.ImagesURL,
 	})
 	if err != nil {
 		newResponse(ctx, http.StatusInternalServerError, err.Error())
@@ -234,9 +224,6 @@ func (h *Handler) updateAd(ctx *gin.Context) {
 
 	if category := strings.Split(inputAds.Category, "/"); len(category) > 0 {
 		inputAds.Category = category[len(category)-1]
-	} else {
-		newResponse(ctx, http.StatusBadRequest, "empty category body")
-		return
 	}
 
 	err = h.services.UpdateAd(userId, adId, service.Ads{
@@ -277,6 +264,10 @@ func getUserId(ctx *gin.Context) (string, error) {
 	id, ok := ctx.Get(userContext)
 	if !ok {
 		return "", errors.New("empty user context")
+	}
+
+	if id == "" {
+		return "", errors.New("empty body of user context")
 	}
 
 	userId, ok := id.(string)
