@@ -86,6 +86,8 @@ values ('Аренда домов', 12),
        ('Продажа домов', 12);
 
 insert into admins (login, password_hash)
-values ('admin1@gmail.com', '6473667364666d31336b326d444d4b53464d53444b469347bb6d872adfd5180cbab2fa8fd64014064e45'); --password - dfghjk1503
+values ('admin1@gmail.com',
+        '6473667364666d31336b326d444d4b53464d53444b469347bb6d872adfd5180cbab2fa8fd64014064e45'); --password - dfghjk1503
 insert into admins (login, password_hash)
-values ('admin2@gmail.com', '6473667364666d31336b326d444d4b53464d53444b469f8d826c82de9b38b0572acbd7cc465bcc424831'); --password - dfghjk
+values ('admin2@gmail.com',
+        '6473667364666d31336b326d444d4b53464d53444b469f8d826c82de9b38b0572acbd7cc465bcc424831'); --password - dfghjk

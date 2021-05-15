@@ -7,12 +7,12 @@ import (
 )
 
 const (
-	UsersTable = "users"
-	AdminsTable = "admins"
-	RefreshSessionsTable = "refreshSessions"
-	AdsTable = "ads"
-	CategoriesTable = "categories"
-	ContactsInfoTable = "contacts_info"
+	UsersTable               = "users"
+	AdminsTable              = "admins"
+	RefreshSessionsTable     = "refreshSessions"
+	AdsTable                 = "ads"
+	CategoriesTable          = "categories"
+	ContactsInfoTable        = "contacts_info"
 	AdminRefreshSessionTable = "adminsRefreshSessions"
 )
 

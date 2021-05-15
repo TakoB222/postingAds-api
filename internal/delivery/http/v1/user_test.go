@@ -19,53 +19,53 @@ func TestSignUp(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAuthorization, input service.UserSignUpInput)
 
 	testTable := []struct {
-		name string
-		inputBody string
-		inputUser signUpInput
-		mockBehavior mockBehavior
-		expectedStatusCode int
+		name                 string
+		inputBody            string
+		inputUser            signUpInput
+		mockBehavior         mockBehavior
+		expectedStatusCode   int
 		expectedResponseBody string
 	}{
 		{
-			name: "ok",
+			name:      "ok",
 			inputBody: `{"firstName":"artem", "lastName":"yevsuikov", "email":"example1@gmail.com", "password":"dfghjk1503"}`,
 			inputUser: signUpInput{
 				FirstName: "artem",
-				LastName: "yevsuikov",
-				Email: "example1@gmail.com",
-				Password: "dfghjk1503",
+				LastName:  "yevsuikov",
+				Email:     "example1@gmail.com",
+				Password:  "dfghjk1503",
 			},
 			mockBehavior: func(s *mock_service.MockAuthorization, input service.UserSignUpInput) {
 				s.EXPECT().SignUp(input).Return(1, nil)
 			},
-			expectedStatusCode: 201,
+			expectedStatusCode:   201,
 			expectedResponseBody: `{"id":1}`,
 		},
 		{
-			name: "Empty field",
+			name:      "Empty field",
 			inputBody: `{"lastName":"yevsuikov", "email":"example1@gmail.com", "password":"dfghjk1503"}`,
 			inputUser: signUpInput{
 				LastName: "yevsuikov",
-				Email: "example1@gmail.com",
+				Email:    "example1@gmail.com",
 				Password: "dfghjk1503",
 			},
-			mockBehavior: func(s *mock_service.MockAuthorization, input service.UserSignUpInput) {},
-			expectedStatusCode: 400,
+			mockBehavior:         func(s *mock_service.MockAuthorization, input service.UserSignUpInput) {},
+			expectedStatusCode:   400,
 			expectedResponseBody: `{"message":"invalid input body"}`,
 		},
 		{
-			name: "service error",
+			name:      "service error",
 			inputBody: `{"firstName":"artem", "lastName":"yevsuikov", "email":"example1@gmail.com", "password":"dfghjk1503"}`,
 			inputUser: signUpInput{
 				FirstName: "artem",
-				LastName: "yevsuikov",
-				Email: "example1@gmail.com",
-				Password: "dfghjk1503",
+				LastName:  "yevsuikov",
+				Email:     "example1@gmail.com",
+				Password:  "dfghjk1503",
 			},
 			mockBehavior: func(s *mock_service.MockAuthorization, input service.UserSignUpInput) {
 				s.EXPECT().SignUp(input).Return(1, errors.New("service failure"))
 			},
-			expectedStatusCode: 500,
+			expectedStatusCode:   500,
 			expectedResponseBody: `{"message":"service failure"}`,
 		},
 	}
@@ -79,7 +79,7 @@ func TestSignUp(t *testing.T) {
 			testCase.mockBehavior(auth, service.UserSignUpInput{
 				FirsName: testCase.inputUser.FirstName,
 				LastName: testCase.inputUser.LastName,
-				Email: testCase.inputUser.Email,
+				Email:    testCase.inputUser.Email,
 				Password: testCase.inputUser.Password,
 			})
 
@@ -103,40 +103,40 @@ func TestSignUp(t *testing.T) {
 func TestRefreshTokens(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAuthorization, input service.RefreshInput)
 
-	testTable := []struct{
-		name string
-		inputBody string
-		inputRefresh refreshTokensInput
-		mockBehavior mockBehavior
-		expectedStatusCode int
+	testTable := []struct {
+		name                 string
+		inputBody            string
+		inputRefresh         refreshTokensInput
+		mockBehavior         mockBehavior
+		expectedStatusCode   int
 		expectedResponseBody string
 	}{
 		{
-			name: "ok",
-			inputBody: `{"RefreshToken":"someToken"}`,
+			name:         "ok",
+			inputBody:    `{"RefreshToken":"someToken"}`,
 			inputRefresh: refreshTokensInput{RefreshToken: "someToken"},
 			mockBehavior: func(s *mock_service.MockAuthorization, input service.RefreshInput) {
 				s.EXPECT().RefreshSession(input).Return(service.Tokens{RefreshToken: "someRefreshToken", AccessToken: "someAccessToken"}, nil)
 			},
-			expectedStatusCode: 201,
+			expectedStatusCode:   201,
 			expectedResponseBody: `{"access_token":"someAccessToken","refresh_token":"someRefreshToken"}`,
 		},
 		{
-			name: "Empty input token field",
-			inputBody: `{"RefreshToken":""}`,
-			inputRefresh: refreshTokensInput{RefreshToken: ""},
-			mockBehavior: func(s *mock_service.MockAuthorization, input service.RefreshInput) {},
-			expectedStatusCode: 400,
+			name:                 "Empty input token field",
+			inputBody:            `{"RefreshToken":""}`,
+			inputRefresh:         refreshTokensInput{RefreshToken: ""},
+			mockBehavior:         func(s *mock_service.MockAuthorization, input service.RefreshInput) {},
+			expectedStatusCode:   400,
 			expectedResponseBody: `{"message":"invalid input body"}`,
 		},
 		{
-			name: "service error",
-			inputBody: `{"RefreshToken":"someToken"}`,
+			name:         "service error",
+			inputBody:    `{"RefreshToken":"someToken"}`,
 			inputRefresh: refreshTokensInput{RefreshToken: "someToken"},
 			mockBehavior: func(s *mock_service.MockAuthorization, input service.RefreshInput) {
 				s.EXPECT().RefreshSession(input).Return(service.Tokens{}, errors.New("service failure"))
 			},
-			expectedStatusCode: 500,
+			expectedStatusCode:   500,
 			expectedResponseBody: `{"message":"service failure"}`,
 		},
 	}
@@ -171,40 +171,40 @@ func TestRefreshTokens(t *testing.T) {
 func TestSignIn(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAuthorization, input service.SignInInput)
 
-	testTable := []struct{
-		name string
-		inputBody string
-		inputSignIn signInInput
-		mockBehavior mockBehavior
-		expectedStatusCode int
+	testTable := []struct {
+		name                 string
+		inputBody            string
+		inputSignIn          signInInput
+		mockBehavior         mockBehavior
+		expectedStatusCode   int
 		expectedResponseBody string
 	}{
 		{
-			name: "ok",
-			inputBody: `{"email":"example@gmail.com","password":"somePassword"}`,
+			name:        "ok",
+			inputBody:   `{"email":"example@gmail.com","password":"somePassword"}`,
 			inputSignIn: signInInput{Email: "example@gmail.com", Password: "somePassword"},
 			mockBehavior: func(s *mock_service.MockAuthorization, input service.SignInInput) {
 				s.EXPECT().SignIn(input).Return(service.Tokens{RefreshToken: "someRefreshToken", AccessToken: "someAccessToken"}, nil)
 			},
-			expectedStatusCode: 200,
+			expectedStatusCode:   200,
 			expectedResponseBody: `{"access_token":"someAccessToken","refresh_token":"someRefreshToken"}`,
 		},
 		{
-			name: "Empty field",
-			inputBody: `{"email":"example@gmail.com"}`,
-			inputSignIn: signInInput{Email: "example@gmail.com"},
-			mockBehavior: func(s *mock_service.MockAuthorization, input service.SignInInput) {},
-			expectedStatusCode: 400,
+			name:                 "Empty field",
+			inputBody:            `{"email":"example@gmail.com"}`,
+			inputSignIn:          signInInput{Email: "example@gmail.com"},
+			mockBehavior:         func(s *mock_service.MockAuthorization, input service.SignInInput) {},
+			expectedStatusCode:   400,
 			expectedResponseBody: `{"message":"invalid input body"}`,
 		},
 		{
-			name: "service error",
-			inputBody: `{"email":"example@gmail.com","password":"somePassword"}`,
+			name:        "service error",
+			inputBody:   `{"email":"example@gmail.com","password":"somePassword"}`,
 			inputSignIn: signInInput{Email: "example@gmail.com", Password: "somePassword"},
 			mockBehavior: func(s *mock_service.MockAuthorization, input service.SignInInput) {
 				s.EXPECT().SignIn(input).Return(service.Tokens{}, errors.New("service failure"))
 			},
-			expectedStatusCode: 500,
+			expectedStatusCode:   500,
 			expectedResponseBody: `{"message":"service failure"}`,
 		},
 	}
@@ -216,7 +216,7 @@ func TestSignIn(t *testing.T) {
 
 			auth := mock_service.NewMockAuthorization(c)
 			testCase.mockBehavior(auth, service.SignInInput{
-				Email: testCase.inputSignIn.Email,
+				Email:    testCase.inputSignIn.Email,
 				Password: testCase.inputSignIn.Password,
 			})
 
@@ -236,42 +236,43 @@ func TestSignIn(t *testing.T) {
 		})
 	}
 }
+
 //-------------------------------------------------------------------------
 //тестирование вспомагательной функции - getUserId
 func TestGetUserId(t *testing.T) {
-	testTable := []struct{
-		name string
-		userId interface{}
+	testTable := []struct {
+		name           string
+		userId         interface{}
 		setUserContext bool
-		expectedBody string
-		expectedError error
+		expectedBody   string
+		expectedError  error
 	}{
 		{
-			name: "ok",
-			userId: "1",
+			name:           "ok",
+			userId:         "1",
 			setUserContext: true,
-			expectedBody: "1",
-			expectedError: nil,
+			expectedBody:   "1",
+			expectedError:  nil,
 		},
 		{
-			name: "Empty body user context",
-			userId: "",
+			name:           "Empty body user context",
+			userId:         "",
 			setUserContext: true,
-			expectedBody: "",
-			expectedError: errors.New("empty body of user context"),
+			expectedBody:   "",
+			expectedError:  errors.New("empty body of user context"),
 		},
 		{
-			name: "Wrong type of user context",
-			userId: 1,
+			name:           "Wrong type of user context",
+			userId:         1,
 			setUserContext: true,
-			expectedBody: "",
-			expectedError: errors.New("invalid type of userId from context"),
+			expectedBody:   "",
+			expectedError:  errors.New("invalid type of userId from context"),
 		},
 		{
-			name: "Empty user context",
+			name:           "Empty user context",
 			setUserContext: false,
-			expectedBody: "",
-			expectedError: errors.New("empty user context"),
+			expectedBody:   "",
+			expectedError:  errors.New("empty user context"),
 		},
 	}
 
@@ -298,29 +299,29 @@ func TestGetUserId(t *testing.T) {
 func TestGetAllAds(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAd, userId interface{})
 
-	testTable := []struct{
-		name string
-		userId interface{}
-		mockBehavior mockBehavior
-		expectedStatusCode int
+	testTable := []struct {
+		name                 string
+		userId               interface{}
+		mockBehavior         mockBehavior
+		expectedStatusCode   int
 		expectedResponseBody string
 	}{
 		{
-			name: "Ok",
+			name:   "Ok",
 			userId: "1",
 			mockBehavior: func(s *mock_service.MockAd, userId interface{}) {
 				s.EXPECT().GetAllAds(userId).Return([]domain.Ad{}, nil)
 			},
-			expectedStatusCode: 200,
+			expectedStatusCode:   200,
 			expectedResponseBody: `[]`,
 		},
 		{
-			name: "Service error",
+			name:   "Service error",
 			userId: "1",
 			mockBehavior: func(s *mock_service.MockAd, userId interface{}) {
 				s.EXPECT().GetAllAds(userId).Return([]domain.Ad{}, errors.New("service failure"))
 			},
-			expectedStatusCode: 500,
+			expectedStatusCode:   500,
 			expectedResponseBody: `{"message":"service failure"}`,
 		},
 	}
@@ -338,8 +339,8 @@ func TestGetAllAds(t *testing.T) {
 
 			r := gin.New()
 			r.GET("/getAllAds", func(ctx *gin.Context) {
-					ctx.Set(userContext, testCase.userId)
-			},handler.getAllAds)
+				ctx.Set(userContext, testCase.userId)
+			}, handler.getAllAds)
 
 			w := httptest.NewRecorder()
 			req := httptest.NewRequest("GET", "/getAllAds", bytes.NewBufferString(""))
@@ -355,29 +356,29 @@ func TestGetAllAds(t *testing.T) {
 func TestCreateAd(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAd, userId string, ad service.Ads)
 
-	testTable := []struct{
-		name string
-		setUserContext bool
-		inputBody string
-		inputAd inputAd
-		mockBehavior mockBehavior
-		expectedStatusCode int
+	testTable := []struct {
+		name                 string
+		setUserContext       bool
+		inputBody            string
+		inputAd              inputAd
+		mockBehavior         mockBehavior
+		expectedStatusCode   int
 		expectedResponseBody string
 	}{
 		{
-			name: "ok",
+			name:           "ok",
 			setUserContext: true,
-			inputBody: `{"title": "someTitle","category": "category/category","description": "someDescription","price": 100,"contacts": {"name":"someName","phone_number":"somePhoneNumber","email":"someEmail","location":"someLocation"}, "published": true, "images_url": ["someImageURL"]}`,
+			inputBody:      `{"title": "someTitle","category": "category/category","description": "someDescription","price": 100,"contacts": {"name":"someName","phone_number":"somePhoneNumber","email":"someEmail","location":"someLocation"}, "published": true, "images_url": ["someImageURL"]}`,
 			inputAd: inputAd{
-				Title: "someTitle",
-				Category: "category",
+				Title:       "someTitle",
+				Category:    "category",
 				Description: "someDescription",
-				Price: 100,
+				Price:       100,
 				Contacts: inputContacts{
-					Name: "someName",
+					Name:         "someName",
 					Phone_number: "somePhoneNumber",
-					Email: "someEmail",
-					Location: "someLocation",
+					Email:        "someEmail",
+					Location:     "someLocation",
 				},
 				Published: true,
 				ImagesURL: []string{"someImageURL"},
@@ -385,31 +386,31 @@ func TestCreateAd(t *testing.T) {
 			mockBehavior: func(s *mock_service.MockAd, userId string, ad service.Ads) {
 				s.EXPECT().CreateAd(userId, ad).Return(1, nil)
 			},
-			expectedStatusCode: 201,
+			expectedStatusCode:   201,
 			expectedResponseBody: `{"id":1}`,
 		},
 		{
-			name: "Empty input field",
-			setUserContext: false,
-			inputBody: `{"category": "category/category","description": "someDescription","price": 100,"contacts": {"name":"someName","phone_number":"somePhoneNumber","email":"someEmail","location":"someLocation"}, "published": true, "images_url": ["someImageURL"]}`,
-			mockBehavior: func(s *mock_service.MockAd, userId string, ad service.Ads) {},
-			expectedStatusCode: 400,
+			name:                 "Empty input field",
+			setUserContext:       false,
+			inputBody:            `{"category": "category/category","description": "someDescription","price": 100,"contacts": {"name":"someName","phone_number":"somePhoneNumber","email":"someEmail","location":"someLocation"}, "published": true, "images_url": ["someImageURL"]}`,
+			mockBehavior:         func(s *mock_service.MockAd, userId string, ad service.Ads) {},
+			expectedStatusCode:   400,
 			expectedResponseBody: `{"message":"invalid input body"}`,
 		},
 		{
-			name: "service fail",
+			name:           "service fail",
 			setUserContext: true,
-			inputBody: `{"title": "someTitle","category": "category/category","description": "someDescription","price": 100,"contacts": {"name":"someName","phone_number":"somePhoneNumber","email":"someEmail","location":"someLocation"}, "published": true, "images_url": ["someImageURL"]}`,
+			inputBody:      `{"title": "someTitle","category": "category/category","description": "someDescription","price": 100,"contacts": {"name":"someName","phone_number":"somePhoneNumber","email":"someEmail","location":"someLocation"}, "published": true, "images_url": ["someImageURL"]}`,
 			inputAd: inputAd{
-				Title: "someTitle",
-				Category: "category",
+				Title:       "someTitle",
+				Category:    "category",
 				Description: "someDescription",
-				Price: 100,
+				Price:       100,
 				Contacts: inputContacts{
-					Name: "someName",
+					Name:         "someName",
 					Phone_number: "somePhoneNumber",
-					Email: "someEmail",
-					Location: "someLocation",
+					Email:        "someEmail",
+					Location:     "someLocation",
 				},
 				Published: true,
 				ImagesURL: []string{"someImageURL"},
@@ -417,7 +418,7 @@ func TestCreateAd(t *testing.T) {
 			mockBehavior: func(s *mock_service.MockAd, userId string, ad service.Ads) {
 				s.EXPECT().CreateAd(userId, ad).Return(0, errors.New("service failure"))
 			},
-			expectedStatusCode: 500,
+			expectedStatusCode:   500,
 			expectedResponseBody: `{"message":"service failure"}`,
 		},
 	}
@@ -429,24 +430,24 @@ func TestCreateAd(t *testing.T) {
 
 			ad := mock_service.NewMockAd(c)
 			testCase.mockBehavior(ad, "1", service.Ads{
-				Title: testCase.inputAd.Title,
-				Category: testCase.inputAd.Category,
+				Title:       testCase.inputAd.Title,
+				Category:    testCase.inputAd.Category,
 				Description: testCase.inputAd.Description,
-				Price: testCase.inputAd.Price,
-				Contacts: service.Contacts(testCase.inputAd.Contacts),
-				Published: testCase.inputAd.Published,
-				ImagesURL: testCase.inputAd.ImagesURL,
+				Price:       testCase.inputAd.Price,
+				Contacts:    service.Contacts(testCase.inputAd.Contacts),
+				Published:   testCase.inputAd.Published,
+				ImagesURL:   testCase.inputAd.ImagesURL,
 			})
 
 			services := &service.Service{Ad: ad}
 			handler := Handler{services: services}
 
 			r := gin.New()
-			r.POST("/createAd", func(ctx *gin.Context){
+			r.POST("/createAd", func(ctx *gin.Context) {
 				if testCase.setUserContext {
 					ctx.Set(userContext, "1")
 				}
-			},handler.createAd)
+			}, handler.createAd)
 
 			w := httptest.NewRecorder()
 			req := httptest.NewRequest("POST", "/createAd", bytes.NewBufferString(testCase.inputBody))
@@ -462,35 +463,35 @@ func TestCreateAd(t *testing.T) {
 func TestDeleteAd(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAd, userId string, adId string)
 
-	testTable := []struct{
-		name string
-		setUserContext bool
-		adId string
-		userId string
-		mockBehavior mockBehavior
-		expectedStatusCode int
+	testTable := []struct {
+		name                 string
+		setUserContext       bool
+		adId                 string
+		userId               string
+		mockBehavior         mockBehavior
+		expectedStatusCode   int
 		expectedResponseBody string
 	}{
 		{
-			name: "ok",
+			name:           "ok",
 			setUserContext: true,
-			adId: "1",
-			userId: "1",
+			adId:           "1",
+			userId:         "1",
 			mockBehavior: func(s *mock_service.MockAd, userId string, adId string) {
 				s.EXPECT().DeleteAd(userId, adId).Return(nil)
 			},
-			expectedStatusCode: 200,
+			expectedStatusCode:   200,
 			expectedResponseBody: `"deleted"`,
 		},
 		{
-			name: "service error",
+			name:           "service error",
 			setUserContext: true,
-			adId: "1",
-			userId: "1",
+			adId:           "1",
+			userId:         "1",
 			mockBehavior: func(s *mock_service.MockAd, userId string, adId string) {
 				s.EXPECT().DeleteAd(userId, adId).Return(errors.New("service error"))
 			},
-			expectedStatusCode: 500,
+			expectedStatusCode:   500,
 			expectedResponseBody: `{"message":"service error"}`,
 		},
 	}
@@ -503,7 +504,7 @@ func TestDeleteAd(t *testing.T) {
 			ad := mock_service.NewMockAd(c)
 			testCase.mockBehavior(ad, testCase.userId, testCase.adId)
 
-			services := &service.Service{Ad:ad}
+			services := &service.Service{Ad: ad}
 			handler := Handler{services: services}
 
 			r := gin.New()
@@ -511,7 +512,7 @@ func TestDeleteAd(t *testing.T) {
 				if testCase.setUserContext {
 					ctx.Set(userContext, "1")
 				}
-			},handler.deleteAd)
+			}, handler.deleteAd)
 
 			req := httptest.NewRequest("DELETE", "/deleteAd/"+testCase.adId, bytes.NewBufferString(""))
 			w := httptest.NewRecorder()
