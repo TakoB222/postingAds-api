@@ -83,7 +83,7 @@ func (h *Handler) adminRefreshTokens(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, tokens)
+	ctx.JSON(http.StatusOK, tokens)
 }
 
 func (h *Handler) adminGetAllAds(ctx *gin.Context) {
@@ -124,15 +124,12 @@ func (h *Handler) adminUpdateAd(ctx *gin.Context) {
 
 	var inputAd adminUpdateAdInput
 	if err := ctx.BindJSON(&inputAd); err != nil {
-		newResponse(ctx, http.StatusBadRequest, err.Error())
+		newResponse(ctx, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	if category := strings.Split(inputAd.Category, "/"); len(category) > 0 {
 		inputAd.Category = category[len(category)-1]
-	} else {
-		newResponse(ctx, http.StatusBadRequest, "empty category body")
-		return
 	}
 
 	err := h.services.AdminUpdateAd(adId, service.Ads{
