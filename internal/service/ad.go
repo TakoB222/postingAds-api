@@ -38,16 +38,16 @@ func (s *AdService) CreateAd(userId string, adInput Ads) (int, error) {
 	return adId, nil
 }
 
-func (s *AdService) GetAdById(userId string, adId string) ([]domain.Ad, error) {
+func (s *AdService) GetAdById(userId string, adId string) (domain.Ad, error) {
 	ad, err := s.repo.GetAdById(userId, adId)
 	if err != nil {
-		return []domain.Ad{}, err
+		return domain.Ad{}, err
 	}
 
 	return ad, nil
 }
 
-func (s *AdService) UpdateAd(userId string, adId string, ad Ads) error {
+func (s *AdService) UpdateAd(userId string, adId string, ad Ads) (domain.Ad, error) {
 	err := s.repo.UpdateAd(userId, adId, repository.Ads{
 		Title:       ad.Title,
 		Category:    ad.Category,
@@ -58,10 +58,10 @@ func (s *AdService) UpdateAd(userId string, adId string, ad Ads) error {
 		ImagesURL:   ad.ImagesURL,
 	})
 	if err != nil {
-		return err
+		return domain.Ad{}, err
 	}
 
-	return nil
+	return s.GetAdById(userId, adId)
 }
 
 func (s *AdService) DeleteAd(userId string, adId string) error {
@@ -70,4 +70,13 @@ func (s *AdService) DeleteAd(userId string, adId string) error {
 	}
 
 	return nil
+}
+
+func (s *AdService) Fts(search_request string)([]repository.FtsResponse, error) {
+	ads, err := s.repo.SearchAdByRequest(search_request)
+	if err != nil {
+		return nil, err
+	}
+
+	return ads, nil
 }

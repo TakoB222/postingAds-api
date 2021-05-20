@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	domain "github.com/TakoB222/postingAds-api/internal/domain"
+	repository "github.com/TakoB222/postingAds-api/internal/repository"
 	service "github.com/TakoB222/postingAds-api/internal/service"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -178,11 +179,12 @@ func (mr *MockAdminMockRecorder) AdminSignIn(input interface{}) *gomock.Call {
 }
 
 // AdminUpdateAd mocks base method.
-func (m *MockAdmin) AdminUpdateAd(adId string, ad service.Ads) error {
+func (m *MockAdmin) AdminUpdateAd(adId string, ad service.Ads) (domain.Ad, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AdminUpdateAd", adId, ad)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(domain.Ad)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // AdminUpdateAd indicates an expected call of AdminUpdateAd.
@@ -243,11 +245,26 @@ func (mr *MockAdMockRecorder) DeleteAd(userId, adId interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAd", reflect.TypeOf((*MockAd)(nil).DeleteAd), userId, adId)
 }
 
+// Fts mocks base method.
+func (m *MockAd) Fts(search_request string) ([]repository.FtsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Fts", search_request)
+	ret0, _ := ret[0].([]repository.FtsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Fts indicates an expected call of Fts.
+func (mr *MockAdMockRecorder) Fts(search_request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Fts", reflect.TypeOf((*MockAd)(nil).Fts), search_request)
+}
+
 // GetAdById mocks base method.
-func (m *MockAd) GetAdById(userId, adId string) ([]domain.Ad, error) {
+func (m *MockAd) GetAdById(userId, adId string) (domain.Ad, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAdById", userId, adId)
-	ret0, _ := ret[0].([]domain.Ad)
+	ret0, _ := ret[0].(domain.Ad)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -274,11 +291,12 @@ func (mr *MockAdMockRecorder) GetAllAds(userId interface{}) *gomock.Call {
 }
 
 // UpdateAd mocks base method.
-func (m *MockAd) UpdateAd(userId, adId string, ad service.Ads) error {
+func (m *MockAd) UpdateAd(userId, adId string, ad service.Ads) (domain.Ad, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateAd", userId, adId, ad)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(domain.Ad)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateAd indicates an expected call of UpdateAd.

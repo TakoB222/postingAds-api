@@ -118,7 +118,7 @@ func TestRefreshTokens(t *testing.T) {
 			mockBehavior: func(s *mock_service.MockAuthorization, input service.RefreshInput) {
 				s.EXPECT().RefreshSession(input).Return(service.Tokens{RefreshToken: "someRefreshToken", AccessToken: "someAccessToken"}, nil)
 			},
-			expectedStatusCode:   201,
+			expectedStatusCode:   200,
 			expectedResponseBody: `{"access_token":"someAccessToken","refresh_token":"someRefreshToken"}`,
 		},
 		{

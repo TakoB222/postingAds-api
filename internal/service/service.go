@@ -49,6 +49,10 @@ type (
 		Email        string `json:"email"`
 		Location     string `json:"location"`
 	}
+	FtsResponse struct {
+		Id string `db:"id"`
+		Title string `db:"title"`
+	}
 )
 
 type Authorization interface {
@@ -63,15 +67,16 @@ type Admin interface {
 	AdminGetAllAdsByAdmin() ([]domain.Ad, error)
 	AdminGetAd(adId string) (domain.Ad, error)
 	AdminDeleteUserAdById(adId string) error
-	AdminUpdateAd(adId string, ad Ads) error
+	AdminUpdateAd(adId string, ad Ads) (domain.Ad, error)
 }
 
 type Ad interface {
 	GetAllAds(userId string) ([]domain.Ad, error)
 	CreateAd(userId string, adInput Ads) (int, error)
-	GetAdById(userId string, adId string) ([]domain.Ad, error)
-	UpdateAd(userId, adId string, ad Ads) error
+	GetAdById(userId string, adId string) (domain.Ad, error)
+	UpdateAd(userId, adId string, ad Ads) (domain.Ad, error)
 	DeleteAd(userId string, adId string) error
+	Fts(search_request string)([]repository.FtsResponse, error)
 }
 
 type Service struct {

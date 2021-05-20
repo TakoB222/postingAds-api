@@ -296,10 +296,10 @@ func TestAdminUpdateAd(t *testing.T){
 				ImagesURL: []string{"url"},
 			},
 			mockBehavior: func(s *mock_service.MockAdmin, ad service.Ads) {
-				s.EXPECT().AdminUpdateAd("1", ad).Return(nil)
+				s.EXPECT().AdminUpdateAd("1", ad).Return(domain.Ad{}, nil)
 			},
 			expectedStatusCode: 200,
-			expectedResponseBody: `"updated"`,
+			expectedResponseBody: `{"Id":0,"UserId":"","Title":"","Category":"","Description":"","Price":0,"Contacts":"","Published":false,"ImagesURL":null}`,
 		},
 		{
 			name: "Empty input field",
@@ -327,7 +327,7 @@ func TestAdminUpdateAd(t *testing.T){
 				ImagesURL: []string{"url"},
 			},
 			mockBehavior: func(s *mock_service.MockAdmin, ad service.Ads) {
-				s.EXPECT().AdminUpdateAd("1", ad).Return(errors.New("service failure"))
+				s.EXPECT().AdminUpdateAd("1", ad).Return(domain.Ad{}, errors.New("service failure"))
 			},
 			expectedStatusCode: 500,
 			expectedResponseBody: `{"message":"service failure"}`,

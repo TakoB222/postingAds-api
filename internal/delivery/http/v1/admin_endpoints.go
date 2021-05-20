@@ -132,7 +132,7 @@ func (h *Handler) adminUpdateAd(ctx *gin.Context) {
 		inputAd.Category = category[len(category)-1]
 	}
 
-	err := h.services.AdminUpdateAd(adId, service.Ads{
+	ad, err := h.services.AdminUpdateAd(adId, service.Ads{
 		Title:       inputAd.Title,
 		Category:    inputAd.Category,
 		Description: inputAd.Description,
@@ -146,5 +146,5 @@ func (h *Handler) adminUpdateAd(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, "updated")
+	ctx.JSON(http.StatusOK, ad)
 }

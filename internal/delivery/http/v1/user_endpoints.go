@@ -2,6 +2,7 @@ package v1
 
 import (
 	"errors"
+	"fmt"
 	"github.com/TakoB222/postingAds-api/internal/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -24,6 +25,10 @@ func (h *Handler) InitUsersRoutes(groupApi *gin.RouterGroup) {
 				ads.GET("/:id", h.getAdById)
 				ads.PUT("/:id", h.updateAd)
 				ads.DELETE("/:id", h.deleteAd)
+			}
+			fts := api.Group("/fts")
+			{
+				fts.GET("/", h.fts)
 			}
 		}
 	}
@@ -49,6 +54,10 @@ type (
 	tokenResponse struct {
 		AccessToken  string `json:"accessToken"`
 		RefreshToken string `json:"refreshToken"`
+	}
+
+	inputFTSRequest struct {
+		Request string `json:"request" binding:"required"`
 	}
 )
 
@@ -113,7 +122,7 @@ func (h *Handler) refreshTokens(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, tokens)
+	ctx.JSON(http.StatusOK, tokens)
 }
 
 //------------------Ads------------------
@@ -171,6 +180,8 @@ func (h *Handler) createAd(ctx *gin.Context) {
 		inputAd.Category = category[len(category)-1]
 	}
 
+	fmt.Println(inputAd.Category)
+
 	adId, err := h.services.Ad.CreateAd(userId, service.Ads{
 		Title:       inputAd.Title,
 		Category:    inputAd.Category,
@@ -226,7 +237,7 @@ func (h *Handler) updateAd(ctx *gin.Context) {
 		inputAds.Category = category[len(category)-1]
 	}
 
-	err = h.services.UpdateAd(userId, adId, service.Ads{
+	ad ,err := h.services.UpdateAd(userId, adId, service.Ads{
 		Title:       inputAds.Title,
 		Category:    inputAds.Category,
 		Description: inputAds.Description,
@@ -240,7 +251,7 @@ func (h *Handler) updateAd(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, "updated")
+	ctx.JSON(http.StatusOK, ad)
 }
 
 func (h *Handler) deleteAd(ctx *gin.Context) {
@@ -276,4 +287,20 @@ func getUserId(ctx *gin.Context) (string, error) {
 	}
 
 	return userId, nil
+}
+
+func (h *Handler) fts(ctx *gin.Context) {
+	var input inputFTSRequest
+	if err := ctx.BindJSON(&input); err != nil {
+		newResponse(ctx, http.StatusBadRequest, "invalid input body")
+		return
+	}
+
+	searchResult, err := h.services.Ad.Fts(input.Request)
+	if err != nil {
+		newResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, searchResult)
 }

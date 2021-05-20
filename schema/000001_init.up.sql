@@ -70,7 +70,7 @@ values ('Автобусы', 1),
        ('Мототехника', 1),
        ('Прицепы', 1);
 insert into categories(category)
-values ('Одежда и Обувь'); -- 6
+values ('Одежда и обувь'); -- 6
 insert into categories(category, parent_category)
 values ('Аксессуары', 6),
        ('Женская обувь', 6),
@@ -91,3 +91,22 @@ values ('admin1@gmail.com',
 insert into admins (login, password_hash)
 values ('admin2@gmail.com',
         '6473667364666d31336b326d444d4b53464d53444b469f8d826c82de9b38b0572acbd7cc465bcc424831'); --password - dfghjk
+
+---- help function
+create or replace function make_tsvector(title varchar, description text)
+    returns tsvector as $$
+begin
+    RETURN (setweight(to_tsvector('russian', title), 'A') || setweight(to_tsvector('russian', description), 'B'));
+end
+    $$ language 'plpgsql' immutable;
+
+---- gin index on ads table
+create index if not exists idx_fts_ads on ads
+    using gin(make_tsvector(title, description));
+
+
+
+with recursive tree (category, id, level, pathstr)
+                   as (select category, id, 0, cast('' as text)
+                       from categories
+                       where parent_category is null;

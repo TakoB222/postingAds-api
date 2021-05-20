@@ -60,9 +60,51 @@ func (r *AdminRepository) DeleteAdminSessionByAdminId(adminId string) error {
 func (r *AdminRepository) GetAllAdsByAdmin() ([]domain.Ad, error) {
 	var ads []domain.Ad
 
+	tx, err := r.db.Begin()
+	if err != nil {
+		return []domain.Ad{}, err
+	}
+
 	query := fmt.Sprintf("select * from %s", database.AdsTable)
 	if err := r.db.Select(&ads, query); err != nil {
 		return nil, err
+	}
+
+	for i := 0; i < len(ads); i++ {
+		categoryId, err := strconv.Atoi(ads[i].Category)
+		if err != nil {
+			err := tx.Rollback()
+			if err != nil {
+				return []domain.Ad{}, err
+			}
+			return []domain.Ad{}, err
+		}
+
+		var categorySeq []string
+		query = fmt.Sprintf(`with recursive r as (select id, parent_category, category from categories where id=$1 
+								union 
+								select categories.id, categories.parent_category, categories.category from %s join r on categories.id = r.parent_category) 
+								select category from r;`, database.CategoriesTable)
+		if err := r.db.Select(&categorySeq, query, categoryId); err != nil {
+			err := tx.Rollback()
+			if err != nil {
+				return []domain.Ad{}, err
+			}
+			return []domain.Ad{}, err
+		}
+
+		ads[i].Category = func(categories []string) string{
+			for i := 0; i < len(categories)/2; i++ {
+				tmp := categories[i]
+				categories[i] = categories[len(categories)-1-i]
+				categories[len(categories)-1-i] = tmp
+			}
+			return strings.Join(categories, "/")
+		}(categorySeq)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return []domain.Ad{}, err
 	}
 
 	return ads, nil
@@ -71,8 +113,48 @@ func (r *AdminRepository) GetAllAdsByAdmin() ([]domain.Ad, error) {
 func (r *AdminRepository) GetAd(adId string) (domain.Ad, error) {
 	var ad domain.Ad
 
+	tx, err := r.db.Begin()
+	if err != nil {
+		return domain.Ad{}, err
+	}
+
 	query := fmt.Sprintf("select * from %s where id=$1", database.AdsTable)
 	if err := r.db.Get(&ad, query, adId); err != nil {
+		return domain.Ad{}, err
+	}
+
+	categoryId, err := strconv.Atoi(ad.Category)
+	if err != nil {
+		err := tx.Rollback()
+		if err != nil {
+			return domain.Ad{}, err
+		}
+		return domain.Ad{}, err
+	}
+
+	var categorySeq []string
+	query = fmt.Sprintf(`with recursive r as (select id, parent_category, category from categories where id=$1 
+								union 
+								select categories.id, categories.parent_category, categories.category from %s join r on categories.id = r.parent_category) 
+								select category from r;`, database.CategoriesTable)
+	if err := r.db.Select(&categorySeq, query, categoryId); err != nil {
+		err := tx.Rollback()
+		if err != nil {
+			return domain.Ad{}, err
+		}
+		return domain.Ad{}, err
+	}
+
+	ad.Category = func(categories []string) string{
+		for i := 0; i < len(categories)/2; i++ {
+			tmp := categories[i]
+			categories[i] = categories[len(categories)-1-i]
+			categories[len(categories)-1-i] = tmp
+		}
+		return strings.Join(categories, "/")
+	}(categorySeq)
+
+	if err = tx.Commit(); err != nil {
 		return domain.Ad{}, err
 	}
 

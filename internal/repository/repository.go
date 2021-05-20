@@ -27,6 +27,11 @@ type (
 		Email        string `json:"email"`
 		Location     string `json:"location"`
 	}
+
+	FtsResponse struct {
+		Id string `db:"id"`
+		Title string `db:"title"`
+	}
 )
 
 type User interface {
@@ -51,9 +56,10 @@ type Admin interface {
 type Ad interface {
 	GetAllAdsByUserId(userId string) ([]domain.Ad, error)
 	CreateAd(userId string, input Ads) (int, error)
-	GetAdById(userId string, adId string) ([]domain.Ad, error)
+	GetAdById(userId string, adId string) (domain.Ad, error)
 	UpdateAd(userId string, adId string, ad Ads) error
 	DeleteAd(userId string, adId string) error
+	SearchAdByRequest(search_request string)([]FtsResponse, error)
 }
 
 type Repository struct {

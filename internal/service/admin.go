@@ -102,7 +102,7 @@ func (s *AdminService) AdminDeleteUserAdById(adId string) error {
 	return nil
 }
 
-func (s *AdminService) AdminUpdateAd(adId string, ad Ads) error {
+func (s *AdminService) AdminUpdateAd(adId string, ad Ads) (domain.Ad, error) {
 	if err := s.repo.AdminUpdateAd(adId, repository.Ads{
 		Title:       ad.Title,
 		Category:    ad.Category,
@@ -117,8 +117,8 @@ func (s *AdminService) AdminUpdateAd(adId string, ad Ads) error {
 		Published: ad.Published,
 		ImagesURL: ad.ImagesURL,
 	}); err != nil {
-		return err
+		return domain.Ad{}, err
 	}
 
-	return nil
+	return s.AdminGetAd(adId)
 }
