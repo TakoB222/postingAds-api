@@ -48,6 +48,17 @@ type (
 	}
 )
 
+// @Summary Admin SignIn
+// @Tags admin-auth
+// @Description admin sign in
+// @Accept  json
+// @Produce  json
+// @Param input body adminSignInInput true "sign in info"
+// @Success 200 {object} tokenResponse
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /admins/Sign-In [post]
 func (h *Handler) adminSignIn(ctx *gin.Context) {
 	var input adminSignInInput
 	if err := ctx.BindJSON(&input); err != nil {
@@ -67,6 +78,17 @@ func (h *Handler) adminSignIn(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, tokens)
 }
 
+// @Summary Admin Refresh Tokens
+// @Tags admin-auth
+// @Description admin refresh tokens
+// @Accept  json
+// @Produce  json
+// @Param input body refreshTokensInput true "refresh token info"
+// @Success 200 {object} tokenResponse
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /admins/refreshTokens [post]
 func (h *Handler) adminRefreshTokens(ctx *gin.Context) {
 	var refreshInput refreshTokensInput
 
@@ -86,6 +108,17 @@ func (h *Handler) adminRefreshTokens(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, tokens)
 }
 
+// @Summary Admin Get All His Ads
+// @Security AdminAuth
+// @Tags admin-ads
+// @Description admin get all users ads
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} []domain.Ad
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /admins/api/ads/ [get]
 func (h *Handler) adminGetAllAds(ctx *gin.Context) {
 	ads, err := h.services.Admin.AdminGetAllAdsByAdmin()
 	if err != nil {
@@ -96,6 +129,18 @@ func (h *Handler) adminGetAllAds(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ads)
 }
 
+// @Summary Admin Get Ad By AdId
+// @Security AdminAuth
+// @Tags admin-ads
+// @Description admin get ad by adId
+// @Accept  json
+// @Produce  json
+// @Param id path string true "adId"
+// @Success 200 {object} domain.Ad
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /admins/api/ads/{id} [get]
 func (h *Handler) adminGetAd(ctx *gin.Context) {
 	id := ctx.Param("id")
 
@@ -108,6 +153,18 @@ func (h *Handler) adminGetAd(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ad)
 }
 
+// @Summary Admin Delete Ad
+// @Security AdminAuth
+// @Tags admin-ads
+// @Description admin delete user ad by adId
+// @Accept  json
+// @Produce  json
+// @Param id path string true "adId"
+// @Success 200 {object} string "deleted"
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /admins/api/ads/{id} [delete]
 func (h *Handler) adminDeleteAd(ctx *gin.Context) {
 	id := ctx.Param("id")
 
@@ -119,6 +176,19 @@ func (h *Handler) adminDeleteAd(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, "deleted")
 }
 
+// @Summary Admin Update User Ad
+// @Security AdminAuth
+// @Tags admin-ads
+// @Description admin create ad
+// @Accept  json
+// @Produce  json
+// @Param id path string true "adId"
+// @Param input body inputAd true "ad info"
+// @Success 200 {object} domain.Ad
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /admins/api/ads/{id} [put]
 func (h *Handler) adminUpdateAd(ctx *gin.Context) {
 	adId := ctx.Param("id")
 

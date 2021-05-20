@@ -62,7 +62,17 @@ type (
 )
 
 //------------------Authorization------------------
-
+// @Summary User SignIn
+// @Tags users-auth
+// @Description user sign in
+// @Accept  json
+// @Produce  json
+// @Param input body signInInput true "sign in info"
+// @Success 200 {object} tokenResponse
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /auth/Sign-In [post]
 func (h *Handler) signIn(ctx *gin.Context) {
 	var input signInInput
 	if err := ctx.BindJSON(&input); err != nil {
@@ -82,6 +92,17 @@ func (h *Handler) signIn(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, tokens)
 }
 
+// @Summary User SignUp
+// @Tags users-auth
+// @Description create user account
+// @Accept  json
+// @Produce  json
+// @Param input body signUpInput true "sign up info"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /auth/Sign-Up [post]
 func (h *Handler) signUp(ctx *gin.Context) {
 	var input signUpInput
 	if err := ctx.BindJSON(&input); err != nil {
@@ -106,6 +127,17 @@ func (h *Handler) signUp(ctx *gin.Context) {
 	})
 }
 
+// @Summary User Refresh Tokens
+// @Tags users-auth
+// @Description user refresh tokens
+// @Accept  json
+// @Produce  json
+// @Param input body refreshTokensInput true "refresh token info"
+// @Success 200 {object} tokenResponse
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /auth/refreshTokens [post]
 func (h *Handler) refreshTokens(ctx *gin.Context) {
 	var refreshInput refreshTokensInput
 
@@ -147,6 +179,17 @@ type (
 	}
 )
 
+// @Summary User Get All His Ads
+// @Security UsersAuth
+// @Tags users-ads
+// @Description user get all his ads by userId
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} []domain.Ad
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /auth/api/ads/ [get]
 func (h *Handler) getAllAds(ctx *gin.Context) {
 	userId, err := getUserId(ctx)
 	if err != nil {
@@ -163,6 +206,18 @@ func (h *Handler) getAllAds(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ads)
 }
 
+// @Summary User Create Own Ad
+// @Security UsersAuth
+// @Tags users-ads
+// @Description user create his own ad
+// @Accept  json
+// @Produce  json
+// @Param input body inputAd true "create ad info"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /auth/api/ads/ [post]
 func (h *Handler) createAd(ctx *gin.Context) {
 	var inputAd inputAd
 	if err := ctx.BindJSON(&inputAd); err != nil {
@@ -201,6 +256,18 @@ func (h *Handler) createAd(ctx *gin.Context) {
 	})
 }
 
+// @Summary User Get Ad By AdId
+// @Security UsersAuth
+// @Tags users-ads
+// @Description user get ad by adId
+// @Accept  json
+// @Produce  json
+// @Param id path string true "adId"
+// @Success 200 {object} domain.Ad
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /auth/api/ads/{id} [get]
 func (h *Handler) getAdById(ctx *gin.Context) {
 	adId := ctx.Param("id")
 
@@ -218,6 +285,19 @@ func (h *Handler) getAdById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ad)
 }
 
+// @Summary User Update His Ad
+// @Security UsersAuth
+// @Tags users-ads
+// @Description user create ad
+// @Accept  json
+// @Produce  json
+// @Param id path string true "adId"
+// @Param input body inputAd true "ad info"
+// @Success 200 {object} domain.Ad
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /auth/api/ads/{id} [put]
 func (h *Handler) updateAd(ctx *gin.Context) {
 	adId := ctx.Param("id")
 
@@ -254,6 +334,18 @@ func (h *Handler) updateAd(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ad)
 }
 
+// @Summary User Delete Ad
+// @Security UsersAuth
+// @Tags users-ads
+// @Description user delete his ad
+// @Accept  json
+// @Produce  json
+// @Param id path string true "adId"
+// @Success 200 {object} string "deleted"
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /auth/api/ads/{id} [delete]
 func (h *Handler) deleteAd(ctx *gin.Context) {
 	adId := ctx.Param("id")
 
@@ -269,6 +361,34 @@ func (h *Handler) deleteAd(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, "deleted")
+}
+
+// @Summary User Search Ads
+// @Security UsersAuth
+// @Tags users-ads
+// @Description user search ads by his request string
+// @Accept  json
+// @Produce  json
+// @Param input body inputFTSRequest true "search request"
+// @Success 200 {object} repository.FtsResponse
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Failure default {object} response
+// @Router /auth/api/fts/ [get]
+func (h *Handler) fts(ctx *gin.Context) {
+	var input inputFTSRequest
+	if err := ctx.BindJSON(&input); err != nil {
+		newResponse(ctx, http.StatusBadRequest, "invalid input body")
+		return
+	}
+
+	searchResult, err := h.services.Ad.Fts(input.Request)
+	if err != nil {
+		newResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, searchResult)
 }
 
 func getUserId(ctx *gin.Context) (string, error) {
@@ -287,20 +407,4 @@ func getUserId(ctx *gin.Context) (string, error) {
 	}
 
 	return userId, nil
-}
-
-func (h *Handler) fts(ctx *gin.Context) {
-	var input inputFTSRequest
-	if err := ctx.BindJSON(&input); err != nil {
-		newResponse(ctx, http.StatusBadRequest, "invalid input body")
-		return
-	}
-
-	searchResult, err := h.services.Ad.Fts(input.Request)
-	if err != nil {
-		newResponse(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	ctx.JSON(http.StatusOK, searchResult)
 }

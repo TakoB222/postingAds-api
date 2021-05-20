@@ -262,7 +262,6 @@ func (r *AdRepository) SearchAdByRequest(search_request string)([]FtsResponse, e
 	var res []FtsResponse
 
 	query := fmt.Sprintf("select id, ts_headline(title, q) as title from %s, plainto_tsquery('russian', $1) as q where make_tsvector(title, description) @@ q order by ts_rank(make_tsvector(title, description), q) desc", database.AdsTable)
-	fmt.Println(query)
 	if err := r.db.Select(&res, query, search_request); err != nil {
 		return nil, err
 	}

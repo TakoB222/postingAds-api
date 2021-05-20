@@ -5,6 +5,8 @@ import (
 	"github.com/TakoB222/postingAds-api/internal/service"
 	"github.com/TakoB222/postingAds-api/pkg/auth"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"net/http"
 )
 
@@ -28,6 +30,8 @@ func (h *Handler) Init() *gin.Engine {
 	router.GET("/ping", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "pong")
 	})
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	h.initAPI(router)
 

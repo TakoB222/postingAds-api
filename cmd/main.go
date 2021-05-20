@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "github.com/TakoB222/postingAds-api/docs"
 	"github.com/TakoB222/postingAds-api/internal/config"
 	"github.com/TakoB222/postingAds-api/internal/delivery/http"
 	"github.com/TakoB222/postingAds-api/internal/repository"
@@ -31,6 +32,21 @@ type dependecies struct {
 	tokenManager *auth.Manager
 	hasher       *hash.SHA1Hasher
 }
+
+// @title Application for posting ads
+// @version 1.0
+// @description API Server for Posting Ads
+
+// @host localhost:8000
+// @BasePath /api/v1/
+
+// @securityDefinitions.apikey AdminAuth
+// @in header
+// @name Authorization
+
+// @securityDefinitions.apikey UsersAuth
+// @in header
+// @name Authorization
 
 func main() {
 	cfg, err := initConfigManager()
