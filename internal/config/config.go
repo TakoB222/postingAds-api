@@ -2,9 +2,13 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"github.com/TakoB222/postingAds-api/pkg/logger"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
+	"io/ioutil"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -13,7 +17,8 @@ const (
 	defaultHttpRWTimeout          = 10 * time.Second
 	defaultHttpMaxHeaderMegabytes = 1
 
-	defaultConfigPath = "./configs/config.yml"
+	defaultConfigPath = "../configs/config.yml"
+	//envBase = "../"
 )
 
 type (
@@ -78,8 +83,8 @@ func populateDefaults() {
 	viper.SetDefault("http.maxHeaderBytes", defaultHttpMaxHeaderMegabytes)
 }
 
-func parseConfigFile(filepath string) error {
-	//path := strings.Split(filepath, "/")
+func parseConfigFile(filePath string) error {
+	//rawPath := strings.Split(filePath, "/")
 
 	viper.AddConfigPath("configs") // folder
 	viper.SetConfigName("config")  // config file name
@@ -103,7 +108,37 @@ func unmarshal(cfg *Config) error {
 	return viper.UnmarshalKey("db.postgres", &cfg.Postgres)
 }
 
+func grabDirectory(dataPath string) ([]string, error) {
+	//fmt.Printf("Scan from dir - %s\n", dataPath)
+
+	files, err := ioutil.ReadDir(dataPath)
+	if err != nil {
+		fmt.Printf("error occurred with a ReadDir: %v", err.Error())
+	}
+
+	var filesArray []string
+	for _, file := range files {
+		filePath := filepath.Join(dataPath, file.Name())
+		if file.IsDir() {
+			files, err := grabDirectory(filePath)
+			if err != nil {
+				return nil, err
+			}
+			filesArray = append(filesArray, files...)
+		}
+		if filepath.Ext(strings.TrimSpace(filePath)) == ".env" {
+			filesArray = append(filesArray, filePath)
+		}
+	}
+
+	return filesArray, nil
+}
+
 func parseEnv() error {
+	//files, err := grabDirectory(envBase)
+	//if err != nil {
+	//	logger.Error("error occurred with grabbing directory")
+	//}
 	if err := godotenv.Load(); err != nil {
 		logger.Error("error occurred with environment load")
 	}

@@ -103,10 +103,3 @@ end
 ---- gin index on ads table
 create index if not exists idx_fts_ads on ads
     using gin(make_tsvector(title, description));
-
-
-
-with recursive tree (category, id, level, pathstr)
-                   as (select category, id, 0, cast('' as text)
-                       from categories
-                       where parent_category is null;

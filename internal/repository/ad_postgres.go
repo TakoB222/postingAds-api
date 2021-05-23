@@ -43,9 +43,9 @@ func (r *AdRepository) GetAllAdsByUserId(userId string) ([]domain.Ad, error) {
 
 		var categorySeq []string
 		query = fmt.Sprintf(`with recursive r as (select id, parent_category, category from categories where id=$1 
-								union 
-								select categories.id, categories.parent_category, categories.category from %s join r on categories.id = r.parent_category) 
-								select category from r;`, database.CategoriesTable)
+									union 
+									select categories.id, categories.parent_category, categories.category from %s join r on categories.id = r.parent_category) 
+									select category from r;`, database.CategoriesTable)
 		if err := r.db.Select(&categorySeq, query, categoryId); err != nil {
 			err := tx.Rollback()
 			if err != nil {

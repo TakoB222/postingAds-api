@@ -66,7 +66,42 @@ func (r *AuthRepository) DeleteSessionByUserId(userId string) error {
 }
 
 func (r *AuthRepository) SetSession(session domain.Session) error {
-	query := fmt.Sprintf("Insert into %s (userId, refreshToken, expiresIn, createdAt) values ($1,$2,$3,$4)", database.RefreshSessionsTable)
+	var countUserSessions []string
+	query := fmt.Sprintf("select id from %s where userId=$1", database.RefreshSessionsTable)
+	if err := r.db.Select(&countUserSessions, query, session.UserId); err != nil {
+		return err
+	}
+
+	fmt.Println(len(countUserSessions))
+
+	if len(countUserSessions) >= 3 {
+		tx, err := r.db.Begin()
+		if err != nil {
+			return err
+		}
+
+		query = fmt.Sprintf("delete from %s where userId=$1", database.RefreshSessionsTable)
+		if _, err := tx.Exec(query, session.UserId); err != nil {
+			err := tx.Rollback()
+			if err != nil {
+				return err
+			}
+			return err
+		}
+
+		query = fmt.Sprintf("Insert into %s (userId, refreshToken, expiresIn, createdAt) values ($1,$2,$3,$4)", database.RefreshSessionsTable)
+		if _, err := tx.Exec(query, session.UserId, session.RefreshToken, session.ExpiresIn, session.CreatedAt); err != nil {
+			err := tx.Rollback()
+			if err != nil {
+				return err
+			}
+			return err
+		}
+
+		return tx.Commit()
+	}
+
+	query = fmt.Sprintf("Insert into %s (userId, refreshToken, expiresIn, createdAt) values ($1,$2,$3,$4)", database.RefreshSessionsTable)
 	_, err := r.db.Exec(query, session.UserId, session.RefreshToken, session.ExpiresIn, session.CreatedAt)
 	if err != nil {
 		return err

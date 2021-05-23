@@ -30,7 +30,42 @@ func (r *AdminRepository) GetAdminId(email, password_hash string) (string, error
 }
 
 func (r *AdminRepository) SetAdminSession(session domain.AdminSession) error {
-	query := fmt.Sprintf("insert into %s (adminid, refreshtoken, expiresin, createdat) values ($1, $2, $3, $4)", database.AdminRefreshSessionTable)
+	var countAdminSessions []string
+	query := fmt.Sprintf("select id from %s where adminid=$1", database.AdminRefreshSessionTable)
+	if err := r.db.Select(&countAdminSessions, query, session.AdminId); err != nil {
+		return err
+	}
+
+	fmt.Println(len(countAdminSessions))
+
+	if len(countAdminSessions) >= 1 {
+		tx, err := r.db.Begin()
+		if err != nil {
+			return err
+		}
+
+		query = fmt.Sprintf("delete from %s where adminid=$1", database.AdminRefreshSessionTable)
+		if _, err := tx.Exec(query, session.AdminId); err != nil {
+			err := tx.Rollback()
+			if err != nil {
+				return err
+			}
+			return err
+		}
+
+		query = fmt.Sprintf("insert into %s (adminid, refreshtoken, expiresin, createdat) values ($1, $2, $3, $4)", database.AdminRefreshSessionTable)
+		if _, err := tx.Exec(query, session.AdminId, session.RefreshToken, session.ExpiresIn, session.CreatedAt); err != nil {
+			err := tx.Rollback()
+			if err != nil {
+				return err
+			}
+			return err
+		}
+
+		return tx.Commit()
+	}
+
+	query = fmt.Sprintf("insert into %s (adminid, refreshtoken, expiresin, createdat) values ($1, $2, $3, $4)", database.AdminRefreshSessionTable)
 	if _, err := r.db.Exec(query, session.AdminId, session.RefreshToken, session.ExpiresIn, session.CreatedAt); err != nil {
 		return err
 	}
